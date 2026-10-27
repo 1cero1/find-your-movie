@@ -167,7 +167,56 @@ function openOdyssey(){openModal('odyssey-modal');renderOdyssey()}
 function odySelect(i){odyState.answers[odyState.step]=i;saveOdyssey();renderOdyssey()}
 function odyNext(){if(odyState.answers[odyState.step]===undefined)return;if(odyState.step===14){odyState.journey=buildOdyssey();odyState.watched=[]}else odyState.step++;saveOdyssey();renderOdyssey()}
 function odyBack(){odyState.step=Math.max(0,odyState.step-1);saveOdyssey();renderOdyssey()}
-function buildOdyssey(){const a=odyState.answers,preferred=a[2]===1?'crime':a[2]===0?'drama':a[2]===2?'visual':'experimental';const secondary=a[5]===2?'visual':a[5]===3?'experimental':a[5]===1?'drama':preferred;const adventure=a[14]||0;const desired=[1,1,2,2,3,3,3,4,4,5].map(n=>Math.max(1,Math.min(5,n+(adventure===2?0:adventure===0?-2:-1))));let used=new Set(),chosen=[];for(let slot=0;slot<10;slot++){const pool=odyLibrary.map((m,i)=>({m,i})).filter(x=>!used.has(x.i));pool.sort((x,y)=>{function score(o){let m=o.m;let s=12-Math.abs(m[6]-desired[slot])*4;if(slot<4&&m[5]===preferred)s+=8;if(slot>=4&&m[5]===secondary)s+=4;if(slot>=7&&m[5]==='experimental')s+=4;if(a[6]===2&&m[6]>=3)s+=2;if(a[10]===0&&m[2]==='United Kingdom')s+=4;if(a[3]===0&&m[2]!=='United Kingdom')s+=2;if(chosen.some(z=>z[2]===m[2]))s-=5;return s}return score(y)-score(x)||x.i-y.i});chosen.push(pool[0].m);used.add(pool[0].i)}return chosen.map(m=>m[0])}
+function buildOdyssey(){
+ const a=odyState.answers;
+ const genre=a[2]===1?'crime':a[2]===0?'drama':a[2]===2?'visual':a[2]===3?'crime':null;
+ const interest=['drama','drama','visual','experimental'][a[5]??0];
+ const experience=['drama','experimental','visual','crime'][a[8]??0];
+ const memory=['drama','crime','visual','experimental'][a[9]??0];
+ const challenge=a[14]??1;
+ const targets=[1,1,2,2,3,3,4,4,5,5].map(v=>Math.max(1,Math.min(5,v+(challenge===0?-2:challenge===1?-1:0))));
+ const seed=Object.entries(a).reduce((h,[k,v])=>(Math.imul(h^((+k+1)*37+(+v+1)*101),16777619)>>>0),2166136261);
+ const picked=[],used=new Set(),countries=new Map(),types=new Map();
+ for(let slot=0;slot<10;slot++){
+  const scored=odyLibrary.map((m,i)=>{
+   if(used.has(i))return null;
+   const [title,year,country,lesson,desc,type,difficulty]=m;
+   let score=18-Math.abs(difficulty-targets[slot])*4;
+   if(type===genre)score+=slot<4?9:3;
+   if(type===interest)score+=8;
+   if(type===experience)score+=5;
+   if(type===memory)score+=5;
+   if(a[1]===2&&year<1970)score+=5;
+   if(a[1]===1&&type==='experimental')score+=4;
+   if(a[1]===0&&difficulty<=2)score+=4;
+   if(a[3]===0&&country!=='United Kingdom')score+=5;
+   if(a[3]===3&&country!=='United Kingdom')score+=3;
+   if(a[4]>=2&&year>=1990)score+=4;
+   if(a[4]===0&&year<1970)score+=4;
+   if(a[6]===2&&difficulty>=3)score+=5;
+   if(a[6]===0&&difficulty<=2)score+=5;
+   if(a[7]===2&&type==='experimental')score+=6;
+   if(a[7]===0&&difficulty<=3)score+=3;
+   if(a[10]===0&&country==='United Kingdom')score+=7;
+   if(a[11]===2&&year<1970)score+=4;
+   if(a[11]===0&&year>=1990)score+=4;
+   if(a[12]===2&&type==='experimental')score+=8;
+   if(a[12]===0&&type==='experimental')score-=7;
+   if(a[13]===2&&type!==genre)score+=5;
+   if(a[13]===0&&type===genre)score+=5;
+   score-=(countries.get(country)||0)*8;
+   score-=(types.get(type)||0)*3;
+   // Answer-dependent tie-breaker prevents the same fixed ordering every time.
+   const tie=((Math.imul(seed^(i+1)*2654435761,2246822519)>>>0)%1000)/1000;
+   return {m,i,score:score+tie};
+  }).filter(Boolean).sort((x,y)=>y.score-x.score);
+  const best=scored[0];if(!best)break;
+  picked.push(best.m[0]);used.add(best.i);
+  countries.set(best.m[2],(countries.get(best.m[2])||0)+1);
+  types.set(best.m[5],(types.get(best.m[5])||0)+1);
+ }
+ return picked;
+}
 function odyToggleWatched(name,checked){odyState.watched=checked?[...new Set([...odyState.watched,name])]:odyState.watched.filter(n=>n!==name);saveOdyssey();renderOdyssey()}
 function odyReplaceWatched(){const used=new Set(odyState.journey);const replacements=[];odyState.journey.forEach((name,i)=>{if(!odyState.watched.includes(name))return;const old=odyLibrary.find(m=>m[0]===name);const candidate=odyLibrary.filter(m=>!used.has(m[0])).sort((a,b)=>Math.abs(a[6]-old[6])-Math.abs(b[6]-old[6]))[0];if(candidate){used.add(candidate[0]);odyState.journey[i]=candidate[0];replacements.push(candidate[0])}});odyState.watched=[];saveOdyssey();renderOdyssey()}
 function odyRestart(){if(!confirm('Restart your Cinema Explorer Test and clear this journey?'))return;odyState={answers:{},step:0,journey:[],watched:[]};saveOdyssey();renderOdyssey()}
