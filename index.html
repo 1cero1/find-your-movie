@@ -583,21 +583,58 @@ function tasteProfile(answers){
  return {ranked,styleOrder,picks};
 }
 let quizType='',quizIndex=0,quizAnswers=[];function startQuiz(type){quizType=type;quizIndex=0;quizAnswers=[];showQuiz()}
+const moodRecentlyRecommended=[];
 function getMoodRecommendations(answers){
- const preference=answers.join(' ').toLowerCase();
- const scored=movies.map(m=>{let score=0;const genres=m.genres.join(' ').toLowerCase(),moods=m.moods.join(' ').toLowerCase(),desc=m.desc.toLowerCase();
-  if(/calm|gentle|quiet|comfort/.test(preference)){if(/comforting|dreamlike/.test(moods))score+=4;if(/fantasy|animation|drama/.test(genres))score+=1}
-  if(/sad|emotional|strong emotional impact/.test(preference)){if(/emotional|hope/.test(moods+' '+desc))score+=4;if(/drama|romance/.test(genres))score+=2}
-  if(/restless|intense|exciting/.test(preference)){if(/exciting/.test(moods))score+=4;if(/action|thriller|adventure/.test(genres))score+=3;if(m.pace==='Fast-paced')score+=2}
-  if(/curious|wonder|big ideas|thought-provoking/.test(preference)){if(/thought-provoking|dreamlike/.test(moods))score+=4;if(/sci-fi|mystery|fantasy/.test(genres))score+=3}
-  if(/happy|hope|comfort/.test(preference)){if(/hope|comforting/.test(moods+' '+desc))score+=4;if(/comedy|adventure|animation/.test(genres))score+=2}
-  if(/romantic|love|relationships/.test(preference)&&/romance|love/.test(genres+' '+m.theme.toLowerCase()))score+=4;
-  if(/mystery|surprises/.test(preference)&&/thriller|mystery/.test(genres))score+=4;
-  if(/imaginary worlds|dreamlike/.test(preference)&&/fantasy|animation|sci-fi|adventure/.test(genres))score+=4;
-  if(/survival/.test(preference)&&/survival|adventure|drama/.test(genres+' '+m.theme.toLowerCase()))score+=3;
-  return {movie:m,score};}).sort((a,b)=>b.score-a.score||b.movie.rating-a.movie.rating);
- // Always return three suggestions, even when the answers don't closely match the small demo collection.
- return scored.slice(0,3).map(x=>x.movie);
+ const [feeling,energy,after]=answers;
+ const moodRules={
+  Calm:{genres:['Drama','Animation','Fantasy'],moods:['comforting','dreamlike'],pace:'Slow-paced'},
+  Sad:{genres:['Drama','Romance'],moods:['emotional','hopeful'],pace:'Slow-paced'},
+  Restless:{genres:['Action','Thriller','Adventure'],moods:['exciting','tense'],pace:'Fast-paced'},
+  Curious:{genres:['Mystery','Sci-Fi','Fantasy'],moods:['thought-provoking','dreamlike'],pace:null},
+  Happy:{genres:['Comedy','Adventure','Animation'],moods:['comforting','hopeful'],pace:null}
+ };
+ const energyRules={
+  'Gentle and quiet':{genres:['Drama','Romance','Animation'],moods:['comforting','dreamlike'],pace:'Slow-paced'},
+  'Balanced':{genres:['Adventure','Mystery','Comedy'],moods:['hopeful','thought-provoking'],pace:null},
+  'Intense and exciting':{genres:['Action','Thriller','Mystery'],moods:['exciting','tense'],pace:'Fast-paced'}
+ };
+ const endingRules={
+  Hope:{genres:['Adventure','Comedy','Drama'],moods:['hopeful','comforting']},
+  Comfort:{genres:['Comedy','Animation','Romance'],moods:['comforting']},
+  Wonder:{genres:['Fantasy','Sci-Fi','Adventure'],moods:['dreamlike','thought-provoking']},
+  'A strong emotional impact':{genres:['Drama','Romance','Thriller'],moods:['emotional','tense']}
+ };
+ const rules=[{rule:moodRules[feeling],weight:5,label:feeling},{rule:energyRules[energy],weight:4,label:energy},{rule:endingRules[after],weight:4,label:after}];
+ const seen=new Set();
+ const scored=movies.filter(m=>{const id=String(m.tmdbId||m.id||m.title).toLowerCase();if(seen.has(id))return false;seen.add(id);return true}).map(m=>{
+  const genres=(m.genres||[]).map(g=>String(g).toLowerCase());
+  const moods=(m.moods||[]).map(x=>String(x).toLowerCase());
+  const words=[...moods,String(m.theme||'').toLowerCase(),String(m.desc||'').toLowerCase()].join(' ');
+  let score=0;const reasons=[];
+  for(const {rule,weight,label} of rules){if(!rule)continue;
+   let match=0;
+   if((rule.genres||[]).some(g=>genres.includes(g.toLowerCase())))match+=weight;
+   if((rule.moods||[]).some(t=>words.includes(t.toLowerCase())))match+=weight*0.7;
+   if(rule.pace&&String(m.pace||'').toLowerCase()===rule.pace.toLowerCase())match+=weight*0.6;
+   if(match){score+=match;reasons.push(label)}
+  }
+  return {movie:m,score,reasons,id:String(m.tmdbId||m.id||m.title).toLowerCase()};
+ });
+ // Avoid recommending the same three movies repeatedly, without sacrificing relevance.
+ scored.sort((a,b)=>b.score-a.score||String(a.movie.title).localeCompare(String(b.movie.title)));
+ const topScore=scored[0]?.score||0;
+ const eligible=scored.filter(x=>x.score>0&&x.score>=topScore*0.48);
+ const candidates=eligible.length>=3?eligible:scored.filter(x=>x.score>0);
+ const pool=candidates.length?candidates:scored;
+ const fresh=pool.filter(x=>!moodRecentlyRecommended.includes(x.id));
+ const ordered=[...fresh,...pool.filter(x=>moodRecentlyRecommended.includes(x.id))];
+ // Rotate among comparably relevant titles rather than always taking the same top three.
+ const picks=[];const used=new Set();
+ for(const x of ordered){if(used.has(x.id))continue;picks.push(x);used.add(x.id);if(picks.length===3)break}
+ for(const x of scored){if(picks.length>=3)break;if(!used.has(x.id)){picks.push(x);used.add(x.id)}}
+ for(const x of picks)moodRecentlyRecommended.push(x.id);
+ while(moodRecentlyRecommended.length>Math.max(6,Math.min(24,Math.floor(movies.length/2))))moodRecentlyRecommended.shift();
+ return picks;
 }
 function showQuiz(){
  const q=quizzes[quizType],box=document.getElementById(q.box),title=document.getElementById(q.title),res=document.getElementById(q.result);
@@ -620,8 +657,8 @@ function showQuiz(){
   title.textContent=quizType==='mood'?'Your Mood Match Recommendations':'Your Cinematic Taste Profile';
   if(quizType==='mood'){
    const picks=getMoodRecommendations(quizAnswers);
-   res.innerHTML='<strong>Based on your answers:</strong> '+quizAnswers.map(escapeHtml).join(' · ')+'<div class="mood-recommendations">'+picks.map((m,i)=>'<div class="mood-pick"><strong>'+(i+1)+'. '+escapeHtml(m.title)+' ('+m.year+')</strong><div class="meta"><span>'+escapeHtml(m.genres.join(' · '))+'</span><span class="rating">★ '+m.rating.toFixed(1)+'</span></div><p>'+escapeHtml(m.desc)+'</p></div>').join('')+'</div>';
-   const explore=document.createElement('button');explore.className='primary';explore.textContent='Show these recommendations';explore.onclick=()=>{document.getElementById('search').value='';document.getElementById('filters').reset();closeModals();renderMovies(picks);document.getElementById('discover').scrollIntoView({behavior:'smooth'})};box.appendChild(explore);
+   res.innerHTML='<strong>Based on your answers:</strong> '+quizAnswers.map(escapeHtml).join(' · ')+'<div class="mood-recommendations">'+picks.map(({movie:m,reasons},i)=>'<div class="mood-pick"><strong>'+(i+1)+'. '+escapeHtml(m.title)+' ('+m.year+')</strong><div class="meta"><span>'+escapeHtml((m.genres||[]).join(' · '))+'</span><span class="rating">★ '+Number(m.rating||0).toFixed(1)+'</span></div><p>'+escapeHtml(m.desc||'')+'</p><p class="muted">Why this matches: '+escapeHtml(reasons.length?reasons.join(' · '):'A different film to explore')+'</p></div>').join('')+'</div>';
+   const explore=document.createElement('button');explore.className='primary';explore.textContent='Show these recommendations';explore.onclick=()=>{document.getElementById('search').value='';document.getElementById('filters').reset();closeModals();renderMovies(picks.map(x=>x.movie));document.getElementById('discover').scrollIntoView({behavior:'smooth'})};box.appendChild(explore);
   }else{
    const profile=tasteProfile(quizAnswers);
    const top=profile.ranked.slice(0,4),best=profile.styleOrder.slice(0,2).map(x=>x.name.toLowerCase());
