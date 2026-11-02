@@ -651,16 +651,24 @@ function spinWheel(){
  const delta=((desiredMod-currentMod)+360)%360+360*(5+Math.floor(Math.random()*3));
  wheelRotation+=delta;wheelBusy=true;star.disabled=true;star.textContent='…';
  result.classList.add('show');result.textContent='The stars are choosing your genre…';
- // Let the labels travel with the wheel during the spin.
- wheel.querySelectorAll('.wheel-label').forEach(label=>{label.style.transform='translate(-50%,-50%)';});
+ // Keep every genre name readable even while the wheel rotates.
+ // Read the actual rendered wheel angle so counter-rotation follows its CSS easing.
+ const wheelLabels=Array.from(wheel.querySelectorAll('.wheel-label'));
+ const keepLabelsUpright=()=>{
+  const matrix=new DOMMatrixReadOnly(getComputedStyle(wheel).transform);
+  const visibleAngle=Math.atan2(matrix.b,matrix.a)*180/Math.PI;
+  wheelLabels.forEach(label=>{label.style.transform=`translate(-50%,-50%) rotate(${-visibleAngle}deg)`;});
+  if(wheelBusy)requestAnimationFrame(keepLabelsUpright);
+ };
  wheel.style.transform=`rotate(${wheelRotation}deg)`;
+ requestAnimationFrame(keepLabelsUpright);
  let finished=false;
  const finish=(event)=>{
   if(event&&event.target!==wheel)return;
   if(finished)return;finished=true;
-  // Counter-rotate text at rest so genre names never finish upside down.
+  // Lock labels upright at the final wheel angle.
   const restingAngle=((wheelRotation%360)+360)%360;
-  wheel.querySelectorAll('.wheel-label').forEach(label=>{label.style.transform=`translate(-50%,-50%) rotate(${-restingAngle}deg)`;});
+  wheelLabels.forEach(label=>{label.style.transform=`translate(-50%,-50%) rotate(${-restingAngle}deg)`;});
   wheelBusy=false;star.disabled=false;star.textContent='✦';
   wheel.removeEventListener('transitionend',finish);
   clearTimeout(fallback);
