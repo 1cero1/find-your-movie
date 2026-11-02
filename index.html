@@ -74,13 +74,34 @@
 .fym-chat-compose{display:flex;align-items:center;gap:10px;padding:16px 24px;border-top:1px solid #263650}.fym-new-ui .fym-chat-compose input{flex:1;min-width:0;border-radius:16px;background:#111f35;border:1px solid #34445d;color:white;padding:15px;font:14px Arial;margin:0}.fym-new-ui .fym-chat-compose button{border:0;background:#b9a0e7;color:#10172b;border-radius:50%;width:44px;height:44px;font-size:21px}
 .fym-new-ui .fym-msg-status{padding:0 24px;margin:0;min-height:0;font:12px Arial;color:#e8b8b8}.fym-new-ui .fym-msg-status:not(:empty){padding:8px 24px}
 @media(max-width:600px){.fym-msg-panel{padding:0}.fym-msg-card.fym-new-ui{height:100dvh;max-height:100dvh;border-radius:0}.fym-new-ui .fym-inbox-header{padding:22px}.fym-new-ui h2{font-size:37px}.fym-inbox-tools{padding:15px 20px}.fym-new-ui .fym-msg-thread{padding:17px 20px}.fym-chat-history{padding:17px}.fym-new-ui #fym-msg-find{padding:15px 20px}}
+
+
+/* Compact, icon-only film actions with accessible hover/focus explanations */
+.dna-actions.movie-icon-actions{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-top:12px}
+.movie-icon-actions .movie-icon-btn{position:relative;display:grid;place-items:center;flex:1;min-width:0;height:35px;padding:5px;border:1px solid #304a68;border-radius:9px;background:#0a1a2d;color:#a9bfd9;cursor:pointer;transition:background .18s,color .18s,border-color .18s}
+.movie-icon-actions .movie-icon-btn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.movie-icon-actions .movie-icon-btn:hover,.movie-icon-actions .movie-icon-btn:focus-visible{background:#1b3450;color:#fff;border-color:#83baff;outline:none}
+.movie-icon-actions .movie-icon-btn.active{color:#a4d6ff;background:#173550;border-color:#67aee7}
+/* Filled bookmark, red heart and animated watched eye. */
+.movie-icon-actions .dna-orbit-card.active svg{fill:currentColor;stroke:currentColor}
+.movie-icon-actions .dna-love-card.active{color:#ff526e;background:#40172b;border-color:#d74b68;box-shadow:0 0 12px #f04c6c30}
+.movie-icon-actions .dna-love-card.active svg{fill:currentColor;stroke:currentColor}
+.movie-icon-actions .dna-watched-card.active{color:#a7d9ff;background:#173b55;border-color:#73b7e8}
+.movie-icon-actions .dna-watched-card.active svg circle{fill:currentColor;stroke:currentColor}
+@keyframes fym-eye-blink{0%,100%{transform:scaleY(1)}35%,55%{transform:scaleY(.08)}75%{transform:scaleY(1)}}
+.movie-icon-actions .dna-watched-card.just-watched svg{animation:fym-eye-blink .48s ease-in-out;transform-origin:center}
+@media(prefers-reduced-motion:reduce){.movie-icon-actions .dna-watched-card.just-watched svg{animation:none}}
+/* Tooltip is mounted on the document body so movie cards cannot clip it. */
+#fym-floating-tip{position:fixed;z-index:1000;left:0;top:0;pointer-events:none;visibility:hidden;opacity:0;max-width:min(240px,85vw);padding:9px 13px;border:1px solid #45617d;border-radius:10px;background:#101c30;color:#e9f2ff;font:500 12px/1.4 Arial,sans-serif;letter-spacing:.1px;text-align:center;box-shadow:0 12px 32px #000b;transition:opacity .12s}
+#fym-floating-tip.visible{visibility:visible;opacity:1}
+.movie-icon-actions .movie-icon-btn{border-radius:10px}
 </style>
 <style>
 #gaia-welcome{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at center,#15395f 0%,#040b1beF 62%);display:none;align-items:center;justify-content:center;flex-direction:column;overflow:hidden;text-align:center;padding:25px;cursor:pointer}#gaia-welcome.active{display:flex}#gaia-welcome h2{font:normal clamp(2.6rem,7vw,5rem) Georgia,serif;color:#eaf7ff;text-shadow:0 0 30px #7bc6ff;z-index:2;margin:0 0 16px}#gaia-welcome p{font:clamp(1.1rem,3vw,1.7rem) Georgia,serif;color:#c1e4ff;z-index:2}#gaia-welcome button{z-index:2;background:#16466e;border:1px solid #85c9ff;border-radius:24px;color:white;padding:12px 25px;cursor:pointer} .gaia-spark{position:absolute;left:50%;top:50%;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 12px 3px #8bd5ff;animation:gaia-burst 2.4s ease-out both;transform:rotate(var(--angle)) translateX(0)}@keyframes gaia-burst{0%{opacity:0;transform:rotate(var(--angle)) translateX(0) scale(.3)}12%{opacity:1}65%{opacity:1}100%{opacity:0;transform:rotate(var(--angle)) translateX(var(--distance)) scale(.2)}}@media(prefers-reduced-motion:reduce){.gaia-spark{animation:none;display:none}}
 </style>
 <style>
 /* Cinematic DNA */
-.dna-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}.dna-actions button,.dna-btn{border:1px solid #355a80;border-radius:8px;background:#10253d;color:#d9eaff;padding:9px 5px;cursor:pointer;font:12px Arial,sans-serif}.dna-actions button:hover,.dna-btn:hover{background:#1a3d5c}.dna-actions button.active{border-color:#91c9f7;background:#224c6b}.dna-actions .dna-open{grid-column:1/-1;background:linear-gradient(100deg,#17385a,#273c60)}.dna-modal{max-width:610px;max-height:90vh;overflow:auto}.dna-modal h2{margin-bottom:5px}.dna-sub{color:#a8c2db;font:13px/1.6 Arial}.dna-signal-grid{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.dna-signal{border:1px solid #365c7c;border-radius:25px;padding:9px 12px;background:#0e263d;color:#c4d9ed;cursor:pointer;font:12px Arial}.dna-signal.selected{background:#25527a;color:#fff;border-color:#9bcfff}.dna-stars{display:flex;gap:7px;margin:14px 0}.dna-stars button{background:none;border:0;font-size:30px;color:#657e9b;cursor:pointer}.dna-stars button.on{color:#ffce78}.dna-stars .half-star{position:relative;width:35px;height:39px;padding:0;font-size:32px;line-height:39px;flex-shrink:0}.dna-stars .half-star .star-shape{display:block;color:#657e9b}.dna-stars .half-star .star-fill{position:absolute;left:0;top:0;width:0;overflow:hidden;white-space:nowrap;color:#ffce78;pointer-events:none}.dna-stars .half-star .star-hit{position:absolute;top:0;bottom:0;width:50%;border:0;background:transparent;cursor:pointer;padding:0}.dna-stars .half-star .star-hit.left{left:0}.dna-stars .half-star .star-hit.right{right:0}.dna-review{width:100%;min-height:100px;resize:vertical;background:#071a2c;color:#fff;border:1px solid #355d7f;border-radius:9px;padding:12px;font:14px/1.6 Arial}.dna-label{display:block;margin-top:17px;color:#d8eaff;font:14px Arial}.dna-save{margin-top:16px}.dna-collection{margin:24px 0;padding:18px;border:1px solid #2b4868;border-radius:12px;background:#0a1b30}.dna-collection h3{font:normal 22px Georgia;margin:0 0 7px}.dna-entry{border-top:1px solid #29435f;padding:11px 0;color:#d4e6f8;font:13px Arial}.dna-entry button{margin-left:8px;background:none;border:0;color:#9bcfff;cursor:pointer;text-decoration:underline}.dna-hint{color:#9eb9d3;font:12px/1.6 Arial}
+.dna-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}.dna-actions button,.dna-btn{border:1px solid #355a80;border-radius:8px;background:#10253d;color:#d9eaff;padding:9px 5px;cursor:pointer;font:12px Arial,sans-serif}.dna-actions button:hover,.dna-btn:hover{background:#1a3d5c}.dna-actions button.active{border-color:#91c9f7;background:#224c6b}.dna-actions .dna-watched-card{grid-column:1/-1}.dna-actions .dna-open{grid-column:1/-1;background:linear-gradient(100deg,#17385a,#273c60)}.dna-modal{max-width:610px;max-height:90vh;overflow:auto}.dna-modal h2{margin-bottom:5px}.dna-sub{color:#a8c2db;font:13px/1.6 Arial}.dna-signal-grid{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.dna-signal{border:1px solid #365c7c;border-radius:25px;padding:9px 12px;background:#0e263d;color:#c4d9ed;cursor:pointer;font:12px Arial}.dna-signal.selected{background:#25527a;color:#fff;border-color:#9bcfff}.dna-stars{display:flex;gap:7px;margin:14px 0}.dna-stars button{background:none;border:0;font-size:30px;color:#657e9b;cursor:pointer}.dna-stars button.on{color:#ffce78}.dna-stars .half-star{position:relative;width:35px;height:39px;padding:0;font-size:32px;line-height:39px;flex-shrink:0}.dna-stars .half-star .star-shape{display:block;color:#657e9b}.dna-stars .half-star .star-fill{position:absolute;left:0;top:0;width:0;overflow:hidden;white-space:nowrap;color:#ffce78;pointer-events:none}.dna-stars .half-star .star-hit{position:absolute;top:0;bottom:0;width:50%;border:0;background:transparent;cursor:pointer;padding:0}.dna-stars .half-star .star-hit.left{left:0}.dna-stars .half-star .star-hit.right{right:0}.dna-review{width:100%;min-height:100px;resize:vertical;background:#071a2c;color:#fff;border:1px solid #355d7f;border-radius:9px;padding:12px;font:14px/1.6 Arial}.dna-label{display:block;margin-top:17px;color:#d8eaff;font:14px Arial}.dna-save{margin-top:16px}.dna-collection{margin:24px 0;padding:18px;border:1px solid #2b4868;border-radius:12px;background:#0a1b30}.dna-collection h3{font:normal 22px Georgia;margin:0 0 7px}.dna-entry{border-top:1px solid #29435f;padding:11px 0;color:#d4e6f8;font:13px Arial}.dna-entry button{margin-left:8px;background:none;border:0;color:#9bcfff;cursor:pointer;text-decoration:underline}.dna-hint{color:#9eb9d3;font:12px/1.6 Arial}
 
 .dna-taste-row{margin:12px 0}.dna-taste-top{display:flex;justify-content:space-between;gap:12px;color:#d7eaff;font:13px Arial}.dna-taste-track{height:8px;background:#19324d;border-radius:12px;overflow:hidden;margin-top:7px}.dna-taste-fill{height:100%;background:linear-gradient(90deg,#4289c5,#a9d9ff);border-radius:12px}
 /* Beyond the Frame — fifth orbit */
@@ -92,16 +113,143 @@
 .film-page-modal{width:min(850px,94vw);max-height:88vh;overflow:auto}.film-page-layout{display:grid;grid-template-columns:185px 1fr;gap:24px;align-items:start}.film-page-poster{width:100%;border-radius:12px;aspect-ratio:2/3;object-fit:cover;background:#10243b}.film-page-title{font-size:clamp(1.6rem,4vw,2.5rem);margin:0 0 8px}.film-page-meta{color:#b7c9e3;margin:0 0 16px}.film-page-desc{line-height:1.7;color:#d8e5f5}.film-page-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.film-page-actions button{border:1px solid #456486;border-radius:10px;padding:10px 13px;background:#132a43;color:#fff;cursor:pointer}.film-page-actions button:hover{background:#20466b}.film-page-close{float:right;border:0;background:transparent;color:white;cursor:pointer;font-size:25px}.movie-card .poster,.movie-card h3{cursor:pointer}@media(max-width:560px){.film-page-layout{grid-template-columns:105px 1fr;gap:14px}}
 </style><style>
 .fym-msg-head{display:flex;justify-content:flex-end;margin-bottom:12px}.fym-msg-panel{display:none;position:fixed;z-index:30;inset:0;background:#020814eF;align-items:center;justify-content:center;padding:16px}.fym-msg-panel.active{display:flex}.fym-msg-card{width:min(760px,100%);max-height:90vh;overflow:auto;border:1px solid #40658a;border-radius:16px;background:#0b1b31;padding:24px;color:#e8f3ff}.fym-msg-card h2{font:normal 28px Georgia;margin:0 0 12px}.fym-msg-card input,.fym-msg-card textarea{display:block;width:100%;box-sizing:border-box;margin:8px 0 12px;background:#061326;border:1px solid #355879;color:#fff;border-radius:8px;padding:12px;font:14px Arial}.fym-msg-card button{border:1px solid #47749e;background:#163653;color:#fff;border-radius:8px;padding:10px 14px;cursor:pointer;margin:4px 6px 4px 0}.fym-msg-card button:disabled{opacity:.5;cursor:not-allowed}.fym-msg-grid{display:grid;grid-template-columns:minmax(180px,1fr) minmax(0,2fr);gap:18px}.fym-msg-thread{border:1px solid #345475;padding:10px;margin:7px 0;border-radius:8px;cursor:pointer}.fym-msg-thread.active{border-color:#9fd0ff}.fym-msg-bubble{border:1px solid #2b4c6b;padding:10px;border-radius:9px;margin:8px 0;overflow-wrap:anywhere}.fym-msg-bubble.mine{background:#183d60}.fym-msg-note{font:12px/1.6 Arial;color:#a9c2dc}.fym-msg-status{color:#ffcd9c;font:13px Arial;min-height:18px}@media(max-width:600px){.fym-msg-grid{grid-template-columns:1fr}}
-</style></head>
+</style><style>
+/* Dedicated collections page */
+#fym-lists-page{display:none;padding:40px clamp(18px,5vw,72px) 90px;min-height:65vh}
+#fym-lists-page.visible{display:block}
+.fym-list-header{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:26px}
+.fym-list-header h1{font:normal clamp(30px,5vw,52px) Georgia,serif;margin:0}
+.fym-list-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}
+.fym-list-tabs button,.fym-list-choice{border:1px solid #355a80;background:#10253d;color:#e1efff;padding:12px 18px;border-radius:12px;cursor:pointer}
+.fym-list-tabs button.active,.fym-list-choice:hover{background:#235179;border-color:#8acaff}
+.fym-list-choices{display:grid;gap:10px;margin:18px 0}
+.fym-list-choice{text-align:left;display:flex;justify-content:space-between}
+.fym-list-input{width:100%;box-sizing:border-box;background:#071a2c;color:white;border:1px solid #456887;border-radius:10px;padding:12px}
+.fym-list-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:18px}
+.fym-list-film{background:#0b1b30;border:1px solid #2b4868;border-radius:12px;overflow:hidden}
+.fym-list-film img{width:100%;aspect-ratio:2/3;object-fit:cover;background:#13283c}
+.fym-list-film .details{padding:12px;font:13px/1.4 Arial}
+.fym-list-film button{margin-top:8px;background:transparent;border:0;color:#a6d5ff;cursor:pointer;padding:0}
+/* An actual eyelid sweeps down and opens, rather than squashing the entire eye icon. */
+.movie-icon-actions .dna-watched-card{overflow:hidden}
+.movie-icon-actions .dna-watched-card .eye-lid{position:absolute;top:4px;left:calc(50% - 11px);width:22px;height:0;background:#0a1a2d;border-bottom:0 solid #a7d9ff;border-radius:0 0 50% 50%;pointer-events:none;z-index:2}
+@keyframes fym-real-blink{0%,13%,52%,66%,100%{height:0;border-bottom-width:0}27%,42%{height:17px;border-bottom-width:2px}78%,88%{height:15px;border-bottom-width:2px}}
+.movie-icon-actions .dna-watched-card.just-watched .eye-lid{animation:fym-real-blink .9s ease-in-out both}
+.movie-icon-actions .dna-watched-card.just-watched svg{animation:none}
+@media(prefers-reduced-motion:reduce){.movie-icon-actions .dna-watched-card.just-watched .eye-lid{animation:none}}
+</style><style>
+/* Compact right-side collection picker on desktop. */
+@media(min-width:700px){
+ #fym-pick-list-modal{justify-content:flex-end;align-items:center;padding:20px clamp(18px,5vw,80px)}
+ #fym-pick-list-modal .modal{width:min(340px,100%);max-width:340px;max-height:80vh;padding:22px;border-radius:17px;margin:0;overflow:auto}
+ #fym-pick-list-modal h2{font-size:23px;margin-bottom:7px}
+ #fym-pick-list-modal .fym-list-choices{gap:7px;margin:12px 0}
+ #fym-pick-list-modal .fym-list-choice{padding:10px 12px;font-size:12px}
+}
+@media(max-width:699px){#fym-pick-list-modal .modal{width:min(360px,94vw);padding:20px}}
+/* Redesigned clean eye: selected status is a small check, not a fake eyelid. */
+.movie-icon-actions .dna-watched-card .eye-check{opacity:0;stroke:#a7d9ff;stroke-width:2.4;transition:opacity .18s}
+.movie-icon-actions .dna-watched-card.active .eye-check{opacity:1}
+.movie-icon-actions .dna-watched-card.active svg circle{fill:none;stroke:currentColor}
+.movie-icon-actions .dna-watched-card.just-watched svg{animation:fym-eye-pop .32s ease-out both}
+.movie-icon-actions .dna-watched-card.just-watched .eye-lid{animation:none}
+@keyframes fym-eye-pop{0%{transform:scale(.82);opacity:.55}65%{transform:scale(1.12);opacity:1}100%{transform:scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){.movie-icon-actions .dna-watched-card.just-watched svg{animation:none}}
+</style><style>
+/* Compact, instantly visible saved-movie previews */
+#fym-pick-list-modal .modal{overflow-y:auto}
+.fym-list-preview{margin:14px 0 5px;padding:12px;background:#081728;border:1px solid #294866;border-radius:12px}
+.fym-preview-head{font:600 12px Arial,sans-serif;color:#c6dff8;margin-bottom:10px}
+.fym-preview-strip{display:flex;gap:7px;overflow-x:auto;padding-bottom:5px}
+.fym-preview-film{flex:0 0 48px;min-height:68px;border-radius:5px;background:#17334e;color:#d4e6f9;font:9px Arial;overflow:hidden;display:flex;align-items:center;text-align:center}
+.fym-preview-film img{width:100%;height:72px;object-fit:cover;display:block}
+.fym-preview-empty{font:12px Arial;color:#91aeca;margin:0}
+.fym-view-all{width:100%;border:0;background:transparent;color:#a9d6ff;cursor:pointer;text-align:right;font:12px Arial;padding:8px 0 12px}
+.movie-icon-actions .dna-watched-card .watched-tick{opacity:0;transition:opacity .18s}
+.movie-icon-actions .dna-watched-card.active .watched-tick{opacity:1;stroke:#e2c8ff;stroke-width:2.7}
+.movie-icon-actions .dna-watched-card.active{color:#d6b1ff;background:#302046;border-color:#a777e8;box-shadow:0 0 12px #9d5de840}
+.movie-icon-actions .dna-watched-card.active svg circle{fill:#b884f5;stroke:#d6b1ff}
+.movie-icon-actions .dna-watched-card.just-watched svg{animation:none!important}
+</style><style>
+/* A clean eye, with a restrained purple iris rather than an extra tick. */
+.movie-icon-actions .dna-watched-card svg{overflow:visible}
+.movie-icon-actions .dna-watched-card .watched-tick{display:none!important}
+.movie-icon-actions .dna-watched-card.active{color:#c69aff;background:#241a38;border-color:#9564d8;box-shadow:0 0 10px #9d5de82b}
+.movie-icon-actions .dna-watched-card.active svg circle{fill:#a66af1;stroke:#d9bbff;stroke-width:1.6}
+.movie-icon-actions .dna-watched-card.just-watched svg{animation:none!important}
+.fym-add-list-toggle{width:100%;padding:10px 12px;margin-top:12px;text-align:left;border:1px dashed #6b588c;border-radius:9px;background:#18162a;color:#d5baff;cursor:pointer;font:600 12px Arial,sans-serif}
+.fym-add-list-toggle:hover{background:#25203b;border-color:#a777e8}
+#fym-new-list-form[hidden]{display:none!important}
+#fym-new-list-form{padding:4px 2px 8px}
+</style><style>
+/* Complete, symmetric eye silhouette with a purple iris. */
+.movie-icon-actions .dna-watched-card svg{width:22px;height:22px;overflow:visible;fill:none;stroke:currentColor;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round}
+.movie-icon-actions .dna-watched-card.active svg circle{fill:#b884f5;stroke:#e1caff;stroke-width:1.8}
+/* Compact carousel: arrows move through all saved films. */
+.fym-list-preview{padding:12px 10px 10px}
+.fym-preview-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
+.fym-preview-head{margin:0}
+.fym-preview-controls{display:flex;gap:5px}
+.fym-preview-controls button{width:27px;height:27px;border:1px solid #574176;border-radius:8px;background:#231a36;color:#e0c7ff;cursor:pointer;font-size:22px;line-height:19px}
+.fym-preview-controls button:disabled{opacity:.3;cursor:default}
+.fym-preview-strip{display:flex;gap:9px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:#73529b transparent;padding:1px 1px 7px}
+.fym-preview-film{flex:0 0 64px;width:64px;min-height:0;display:flex;flex-direction:column;align-items:stretch;gap:5px;overflow:visible;background:transparent;text-align:left;scroll-snap-align:start}
+.fym-preview-film img{width:64px;height:92px;object-fit:cover;border-radius:6px;border:1px solid #4a3863}
+.fym-preview-title{font:10px/1.25 Arial,sans-serif;color:#d8c9ed;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+</style>
+<style>
+/* Movable, translucent saved-collection panel */
+#fym-pick-list-modal{background:rgba(3,8,20,.34)!important}
+#fym-pick-list-modal .modal{
+  background:rgba(13,20,40,.78)!important;
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(182,143,243,.34);
+  box-shadow:0 16px 60px rgba(0,0,0,.38);
+  position:relative;
+  touch-action:auto;
+}
+#fym-pick-list-modal .fym-drag-handle{
+  cursor:grab;touch-action:none;user-select:none;
+  display:flex;align-items:center;justify-content:center;
+  height:25px;margin:-10px -4px 9px;
+}
+#fym-pick-list-modal .fym-drag-handle:active{cursor:grabbing}
+#fym-pick-list-modal .fym-drag-handle:before{
+  content:'';width:48px;height:5px;border-radius:9px;
+  background:rgba(210,181,255,.55);
+}
+#fym-pick-list-modal .fym-list-preview{background:rgba(11,20,39,.45)}
+#fym-pick-list-modal .fym-preview-strip{cursor:grab;touch-action:pan-y}
+#fym-pick-list-modal .fym-preview-strip.fym-grabbing{cursor:grabbing;scroll-snap-type:none;user-select:none}
+@media(max-width:699px){
+ #fym-pick-list-modal{padding:12px}
+ #fym-pick-list-modal .modal{max-height:85dvh}
+}
+</style>
+
+<style id="wheel-midnight-cyan-theme">
+/* Color only: retain the original circular feature and wheel mechanics. */
+.feature.spin{--accent:#59caff!important;background:transparent!important;border:0!important;box-shadow:none!important}
+.feature.spin .glyph{color:#7edcff!important;border-color:#4aa9e5!important;background:radial-gradient(circle at 40% 35%,#1a4778,#061225 75%)!important;box-shadow:0 0 22px #248fe04d!important;text-shadow:none!important}
+#spin-modal .modal{border-color:#245b91;background:radial-gradient(ellipse at top,#102b50,#071222 68%);box-shadow:0 0 45px #134c8530}
+#spin-modal .wheel{border-color:#81cfff;box-shadow:0 0 0 7px #102f54,0 0 34px #2388da66;background:conic-gradient(from -22.5deg,#092447 0deg 45deg,#175487 45deg 90deg,#0d315d 90deg 135deg,#2775aa 135deg 180deg,#092447 180deg 225deg,#175487 225deg 270deg,#0d315d 270deg 315deg,#2775aa 315deg 360deg)}
+#spin-modal .wheel:after{background:repeating-conic-gradient(from -22.5deg,transparent 0deg 44deg,#b3dcffb0 44deg 45deg)}
+#spin-modal .wheel-pointer{border-top-color:#b8dcff}
+#spin-modal .wheel-star{border-color:#b3dfff;background:radial-gradient(circle at 35% 30%,#276da5,#07172b 74%);box-shadow:0 0 24px #4bafff77;color:#fff}
+#spin-modal .wheel-star:hover{box-shadow:0 0 34px #58baffaa}
+#spin-modal .wheel-label{color:#f1f8ff;text-shadow:0 1px 4px #00101f}
+#spin-modal .result{border-color:#285b8c;color:#d4eaff}
+</style>
+<style>.feature.spin .glyph svg{display:block;width:31px;height:31px;filter:drop-shadow(0 0 7px rgba(83,218,255,.6))}</style></head>
 <body>
 <div id="stars"></div><div id="stars2"></div><div class="shooting-star"></div>
-<header class="topbar"><nav class="nav"><button onclick="scrollTo({top:0,behavior:'smooth'})">Home</button><button onclick="document.getElementById('discover').scrollIntoView({behavior:'smooth'})">Discover</button><button onclick="showSaved()">My List</button><button onclick="showCinematicDNA()">Cinematic DNA ✦</button><button onclick="openProfile()">My Profile</button></nav><input class="search" id="search" placeholder="Search movies or genres…" aria-label="Search movies" oninput="renderMovies()"></header>
+<header class="topbar"><nav class="nav"><button onclick="goHome()">Home</button><button onclick="goDiscover()">Discover</button><button onclick="showSaved()">My List</button><button onclick="showCinematicDNA()">Cinematic DNA ✦</button><button onclick="openProfile()">My Profile</button></nav><input class="search" id="search" placeholder="Search movies or genres…" aria-label="Search movies" oninput="renderMovies()"></header>
 <main><section id="profile-page" class="profile-page" aria-label="My Profile"><button class="profile-back" onclick="leaveProfile()">← Back to movies</button><div class="profile-layout"><aside><div class="profile-avatar" id="profile-avatar">✦</div><label class="profile-photo-label">Change profile photo <input type="file" id="avatar-upload" accept="image/*" hidden onchange="uploadAvatar(event)"></label><div class="profile-side-links"><button data-side="highlights" onclick="profileSide('highlights')">✧ Highlights</button><button data-side="diary" onclick="profileSide('diary')">☾ Movie diary & memories</button></div></aside><div><h1 class="profile-nickname" id="profile-nickname"></h1><p class="profile-realname" id="profile-realname"></p><button type="button" class="profile-level" id="profile-level" onclick="showLevelGuide()" title="See all levels"></button><div class="profile-progress"><span id="profile-progress-fill"></span></div><button type="button" class="profile-xp" id="profile-xp" onclick="showXPGuide()" title="Learn how to earn XP"></button><div class="profile-actions"><button class="profile-action" onclick="profileTab('settings')">Edit profile / Privacy</button><button class="profile-action" onclick="signOut()">Sign out</button></div><div class="profile-tabs" id="profile-tabs"><button data-tab="films" onclick="profileTab('films')">Films</button><button data-tab="lists" onclick="profileTab('lists')">Lists</button><button data-tab="reviews" onclick="profileTab('reviews')">Reviews</button><button data-tab="following" onclick="profileTab('following')">Following</button><button data-tab="followers" onclick="profileTab('followers')">Followers</button></div><div class="fym-signal-row"><button type="button" class="fym-signal-button" onclick="openMessages()" aria-label="Open Signals private messages"><span class="fym-signal-glyph" aria-hidden="true">✧</span><span>Signals</span><span class="fym-signal-orbit" aria-hidden="true">◌</span></button></div><div id="profile-panel" class="profile-panel"></div></div></div></section>
-<section class="hero" aria-label="Find your movie">
+<section id="fym-lists-page" aria-label="My movie lists"><div class="fym-list-header"><h1>My Collections ✦</h1><button class="dna-btn" onclick="goHome()">← Back to movies</button></div><p class="muted">A place for every film you want to remember.</p><div id="fym-list-tabs" class="fym-list-tabs"></div><div id="fym-list-grid" class="fym-list-grid"></div></section><section class="hero" aria-label="Find your movie">
 <svg class="orbit-lines" viewBox="0 0 1440 760" preserveAspectRatio="none" aria-hidden="true"><path d="M100 190 C280 20 450 120 720 370 S1160 650 1340 200"/><path d="M90 540 C350 690 500 570 720 370 S1110 70 1350 540"/><path d="M230 80 C370 300 420 550 720 370 S1100 250 1220 90"/></svg>
 <div class="center-title"><h1>find your<br>movie</h1><p>Every star has a story.<br>Find the one that feels like yours.</p><span class="spark">✧ ───── ✦ ───── ✧</span></div>
 <button class="feature mood" onclick="openModal('mood-modal')"><span class="glyph">☾</span><strong>Mood Match</strong><small>Find a film for how you feel</small></button>
-<button class="feature spin" onclick="openModal('spin-modal')"><span class="glyph">✳</span><strong>Spin the Wheel</strong><small>Let the stars surprise you</small></button>
+<button class="feature spin" onclick="openModal('spin-modal')"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 48 48" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M24 5v38M5 24h38M10.6 10.6l26.8 26.8M37.4 10.6 10.6 37.4" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><circle cx="24" cy="24" r="4.5" fill="currentColor"/></svg></span><strong>Spin the Wheel</strong><small>Let the stars surprise you</small></button>
 <button class="feature taste" onclick="openModal('taste-modal')"><span class="glyph">✧</span><strong>Taste Test</strong><small>Discover your movie taste</small></button>
 <button class="feature filter" onclick="openModal('filter-modal')"><span class="glyph">⌕</span><strong>Filter &amp; Surprise</strong><small>Shape your perfect film</small></button>
 <button class="feature odyssey" onclick="openOdyssey()"><span class="glyph">✦</span><strong>Beyond the Frame</strong><small>Ten films. A new perspective.</small></button>
@@ -111,7 +259,7 @@
 </main><footer>Made for movie nights under an endless sky · Movie data and images provided by TMDB · This product uses the TMDB API but is not endorsed or certified by TMDB</footer>
 
 <div class="overlay" id="odyssey-modal"><div class="modal odyssey-modal" role="dialog" aria-modal="true" aria-labelledby="odyssey-heading"><h2 id="odyssey-heading">✦ Beyond the Frame</h2><div id="odyssey-content"></div><button class="back" type="button" onclick="closeModals()">← Back to Home</button></div></div>
-<div class="overlay" id="dna-modal"><div class="modal dna-modal" role="dialog" aria-modal="true" aria-labelledby="dna-title"><h2 id="dna-title">✦ Your Cinematic DNA</h2><p class="dna-sub" id="dna-film-name"></p><p class="dna-sub">What place does this movie have in your universe?</p><div class="dna-actions"><button type="button" id="dna-orbit" onclick="dnaToggle('orbit')">☾ My Orbit · Watch later</button><button type="button" id="dna-constellation" onclick="dnaToggle('constellation')">♥ My Constellation · Loved</button></div><label class="dna-label">My Verdict · Your rating (half-stars supported)</label><div class="dna-stars" id="dna-stars"></div><label class="dna-label">Taste Signal · What stayed with you?</label><div class="dna-signal-grid" id="dna-signals"></div><label class="dna-label" for="dna-review">Your movie memory · Optional review</label><textarea id="dna-review" class="dna-review" maxlength="1500" placeholder="A scene, a feeling, a thought that stayed with you..."></textarea><button class="primary dna-save" type="button" onclick="saveDnaMemory()">Save to my universe ✦</button><p class="dna-hint">Demo only: saved in this browser, not securely linked to an account or synced across devices.</p><button class="back" onclick="closeModals()">← Back to movies</button></div></div>
+<div class="overlay" id="fym-pick-list-modal"><div class="modal dna-modal" role="dialog" aria-modal="true"><h2>Save to a collection</h2><p class="dna-sub" id="fym-pick-film"></p><div id="fym-list-choices" class="fym-list-choices"></div><div id="fym-list-preview" class="fym-list-preview" aria-live="polite"></div><button class="fym-view-all" type="button" onclick="fymShowLists()">See all saved movies →</button><button class="fym-add-list-toggle" type="button" onclick="fymToggleNewList()" aria-expanded="false" id="fym-add-list-toggle">＋ New list</button><div id="fym-new-list-form" hidden><label class="dna-label" for="fym-new-list-name">List name</label><input id="fym-new-list-name" class="fym-list-input" maxlength="45" placeholder="e.g. Weekend movies"><button class="primary" type="button" onclick="fymCreateAndSaveList()" style="margin-top:10px">Create list & save film</button></div><button class="back" type="button" onclick="closeModals()">Cancel</button></div></div><div class="overlay" id="dna-modal"><div class="modal dna-modal" role="dialog" aria-modal="true" aria-labelledby="dna-title"><h2 id="dna-title">✦ Your Cinematic DNA</h2><p class="dna-sub" id="dna-film-name"></p><p class="dna-sub">What place does this movie have in your universe?</p><div class="dna-actions"><button type="button" id="dna-orbit" onclick="dnaToggle('orbit')">☾ My Orbit · Watch later</button><button type="button" id="dna-constellation" onclick="dnaToggle('constellation')">♥ My Constellation · Loved</button></div><label class="dna-label">My Verdict · Your rating (half-stars supported)</label><div class="dna-stars" id="dna-stars"></div><label class="dna-label">Taste Signal · What stayed with you?</label><div class="dna-signal-grid" id="dna-signals"></div><label class="dna-label" for="dna-review">Your movie memory · Optional review</label><textarea id="dna-review" class="dna-review" maxlength="1500" placeholder="A scene, a feeling, a thought that stayed with you..."></textarea><button class="primary dna-save" type="button" onclick="saveDnaMemory()">Save to my universe ✦</button><p class="dna-hint">Demo only: saved in this browser, not securely linked to an account or synced across devices.</p><button class="back" onclick="closeModals()">← Back to movies</button></div></div>
 <div class="overlay" id="guide-modal"><div class="modal profile-auth-modal"><h2 id="guide-title"></h2><div id="guide-content" class="muted" style="font-size:14px;line-height:1.9"></div><button class="primary" type="button" onclick="closeModals()">Back to profile</button></div></div><div class="overlay" id="auth-modal"><div class="modal profile-auth-modal"><h2 id="auth-title">Join the stars</h2><p class="muted" id="auth-subtitle">Create your profile to save your movie story. Every new member begins as Gaia.</p><form class="profile-form" id="auth-form" novalidate onsubmit="submitAuth(event)"><div id="auth-signup-fields"><label>Nickname <input class="profile-input" id="auth-nickname" maxlength="32" autocomplete="nickname"></label><label>Real name (required) <input class="profile-input" id="auth-realname" maxlength="70" autocomplete="name"></label><label><input type="checkbox" id="auth-showname"> Show my real name to others</label></div><label>Email <input class="profile-input" id="auth-email" type="email" autocomplete="email" required></label><label>Password <input class="profile-input" id="auth-password" type="password" minlength="8" autocomplete="current-password" required></label><p class="profile-error" id="auth-error" aria-live="polite"></p><button class="primary" id="auth-submit" type="button" onclick="submitAuth(event)">Create account</button></form><button class="profile-auth-switch" id="auth-toggle" onclick="toggleAuthMode()">Already have an account? Log in</button><p class="profile-note" id="storage-warning" hidden>Private browsing or opening a local file may prevent saving your account. You can still test the profile now, but it may disappear when you close this page.</p><p class="profile-note" style="margin-top:22px">Account login is secured by Supabase. Your movie diary, XP, photos and reviews are still saved only in this browser; they are not yet synced between devices.</p><button class="back" onclick="closeModals()">← Back</button></div></div>
 <div class="overlay" id="mood-modal"><div class="modal"><h2 id="mood-title">Mood Match</h2><p class="muted">Choose what fits you right now. Your answers will shape a mood profile.</p><div class="choices" id="mood-choices"></div><div id="mood-result" class="result"></div><button class="back" onclick="closeModals()">← Back to Home</button></div></div>
 <div class="overlay" id="taste-modal"><div class="modal"><h2 id="taste-title">Taste Test</h2><p class="muted">Twelve cinematic questions across three chapters. Discover what moves you and find films that match.</p><div class="choices" id="taste-choices"></div><div id="taste-result" class="result"></div><button class="back" onclick="closeModals()">← Back to Home</button></div></div>
@@ -144,8 +292,8 @@ function openFilmPage(m){
  const image=m.img&&m.img.startsWith('https://image.tmdb.org/')?`<img class="film-page-poster" src="${m.img}" alt="${escapeHtml(m.title)} poster">`:'<div class="film-page-poster" style="display:grid;place-items:center;font-size:40px">✦</div>';
  target.innerHTML=`<div class="film-page-layout"><div>${image}</div><div><p class="muted" style="letter-spacing:.15em">✦ FILM UNIVERSE</p><h2 class="film-page-title">${escapeHtml(m.title)}</h2><p class="film-page-meta">${m.year||'Year unknown'} · ${m.genres.map(escapeHtml).join(' · ')||'Genre unknown'} · ★ ${Number(m.rating||0).toFixed(1)} TMDB</p><p class="film-page-desc">${escapeHtml(m.desc||'No synopsis available.')}</p><div class="film-page-actions"><button type="button" id="film-love">♡ Love it</button><button type="button" id="film-orbit">☾ Watch Later</button><button type="button" id="film-dna">✦ Rate & Review</button></div><p class="muted" style="margin-top:20px;font-size:12px">Your personal ratings and reviews are saved in this browser. Trailer and cast details can be added when our Worker supports movie-detail requests.</p></div></div>`;
  function update(){const d=dnaData[dnaKey(m)]||{};document.getElementById('film-love').textContent=d.constellation?'♥ Loved':'♡ Love it';document.getElementById('film-love').style.color=d.constellation?'#ff657d':'';document.getElementById('film-orbit').textContent=d.orbit?'☾ In Your Orbit':'☾ Watch Later'}
- document.getElementById('film-love').onclick=()=>{if(!requireDnaAccount())return;quickDna(m,'constellation');update()};
- document.getElementById('film-orbit').onclick=()=>{if(!requireDnaAccount())return;quickDna(m,'orbit');update()};
+ document.getElementById('film-love').onclick=()=>{quickDna(m,'constellation');update()};
+ document.getElementById('film-orbit').onclick=()=>{quickDna(m,'orbit');update()};
  document.getElementById('film-dna').onclick=()=>openDnaMovie(m);
  update();openModal('film-page-modal');
 }
@@ -159,9 +307,23 @@ function renderMovies(list=movies){
  if(!filtered.length){grid.innerHTML='<p class="muted">No matches among the loaded movies. Try another search or load more movies.</p>';return}
  filtered.forEach(m=>{const c=document.createElement('article');c.className='movie-card';
  const title=escapeHtml(m.title),img=m.img&&m.img.startsWith('https://image.tmdb.org/')?m.img:'';
- c.innerHTML=`<div class="poster">${img?`<img loading="lazy" src="${img}" alt="${title} poster" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">`:''}<span class="poster-fallback" style="display:${img?'none':'block'}">✦</span></div><div class="movie-info"><h3 title="${title}">${title}</h3><div class="meta"><span>${m.year||'—'}</span><span class="rating" title="TMDB user rating">★ ${m.rating.toFixed(1)} · TMDB</span></div><div class="tags">${m.genres.slice(0,3).map(g=>`<span class="tag">${escapeHtml(g)}</span>`).join('')}</div><div class="dna-actions"><button type="button" class="dna-orbit-card">☾ Watch later</button><button type="button" class="dna-love-card">♡ Love it</button><button type="button" class="dna-open">✦ Cinematic DNA</button></div></div>`;
- const k=dnaKey(m),entry=dnaData[k]||{};const orbit=c.querySelector('.dna-orbit-card'),love=c.querySelector('.dna-love-card');orbit.classList.toggle('active',!!entry.orbit);orbit.textContent=entry.orbit?'☾ In your orbit':'☾ Watch later';love.classList.toggle('active',!!entry.constellation);love.setAttribute('aria-pressed',String(!!entry.constellation));love.textContent=entry.constellation?'♥ Loved':'♡ Love it';orbit.addEventListener('click',()=>quickDna(m,'orbit'));love.addEventListener('click',()=>quickDna(m,'constellation'));c.querySelector('.dna-open').addEventListener('click',()=>openDnaMovie(m));c.querySelector('.poster').addEventListener('click',()=>openFilmPage(m));c.querySelector('h3').addEventListener('click',()=>openFilmPage(m));c.querySelector('.poster').setAttribute('title','Open film page');grid.appendChild(c)})}
+ c.innerHTML=`<div class="poster">${img?`<img loading="lazy" src="${img}" alt="${title} poster" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">`:''}<span class="poster-fallback" style="display:${img?'none':'block'}">✦</span></div><div class="movie-info"><h3 title="${title}">${title}</h3><div class="meta"><span>${m.year||'—'}</span><span class="rating" title="TMDB user rating">★ ${m.rating.toFixed(1)} · TMDB</span></div><div class="tags">${m.genres.slice(0,3).map(g=>`<span class="tag">${escapeHtml(g)}</span>`).join('')}</div><div class="dna-actions movie-icon-actions"><button type="button" class="movie-icon-btn dna-orbit-card" aria-label="Watch later" data-tooltip="Add to watchlist"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h12v16l-6-4-6 4z"/></svg></button><button type="button" class="movie-icon-btn dna-love-card" aria-label="Like" data-tooltip="Like"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg></button><button type="button" class="movie-icon-btn dna-watched-card" aria-label="Watched" data-tooltip="Mark as watched"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.06 12.35a1 1 0 0 1 0-.70C3.68 8.20 7.33 5.75 12 5.75s8.32 2.45 9.94 5.90a1 1 0 0 1 0 .70C20.32 15.80 16.67 18.25 12 18.25s-8.32-2.45-9.94-5.90Z"/><circle cx="12" cy="12" r="3.1"/></svg></button><button type="button" class="movie-icon-btn dna-open" aria-label="Cinematic DNA" data-tooltip="Rate & review"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 1.8 7.2L21 11l-7.2 1.8L12 20l-1.8-7.2L3 11l7.2-1.8L12 2zM19 18l.6 1.4L21 20l-1.4.6L19 22l-.6-1.4L17 20l1.4-.6L19 18z"/></svg></button></div></div>`;
+ const k=dnaKey(m),entry=dnaData[k]||{};const orbit=c.querySelector('.dna-orbit-card'),love=c.querySelector('.dna-love-card');orbit.classList.toggle('active',!!entry.orbit);orbit.setAttribute('aria-pressed',String(!!entry.orbit));orbit.setAttribute('aria-label',entry.orbit?'Remove from watchlist':'Add to watchlist');orbit.dataset.tooltip=entry.orbit?'Remove from watchlist':'Add to watchlist';love.classList.toggle('active',!!entry.constellation);love.setAttribute('aria-pressed',String(!!entry.constellation));love.setAttribute('aria-label',entry.constellation?'Unlike':'Like');love.dataset.tooltip=entry.constellation?'Unlike':'Like';const watched=c.querySelector('.dna-watched-card');watched.classList.toggle('active',!!entry.watched);watched.setAttribute('aria-pressed',String(!!entry.watched));watched.setAttribute('aria-label',entry.watched?'Remove watched status':'Watched');watched.dataset.tooltip=entry.watched?'Mark as unwatched':'Mark as watched';orbit.addEventListener('click',()=>fymOpenListPicker(m));love.addEventListener('click',()=>quickDna(m,'constellation'));watched.addEventListener('click',()=>quickDna(m,'watched'));c.querySelector('.dna-open').addEventListener('click',()=>openDnaMovie(m));c.querySelector('.poster').addEventListener('click',()=>openFilmPage(m));c.querySelector('h3').addEventListener('click',()=>openFilmPage(m));c.querySelector('.poster').setAttribute('title','Open film page');grid.appendChild(c)})}
 
+
+/* Compact action tooltips: consistent wording and no clipping by movie cards. */
+(function(){
+ const tip=document.createElement('div');tip.id='fym-floating-tip';tip.setAttribute('role','tooltip');document.body.appendChild(tip);
+ let active=null;
+ function hide(){tip.classList.remove('visible');active=null}
+ function show(btn){if(!btn)return;active=btn;tip.textContent=btn.dataset.tooltip||btn.getAttribute('aria-label')||'';tip.classList.add('visible');const r=btn.getBoundingClientRect();const w=tip.offsetWidth,h=tip.offsetHeight;let x=r.left+r.width/2-w/2;x=Math.max(8,Math.min(innerWidth-w-8,x));const y=r.top-h-10>=8?r.top-h-10:r.bottom+10;tip.style.left=x+'px';tip.style.top=y+'px'}
+ document.addEventListener('pointerover',e=>{const b=e.target.closest?.('.movie-icon-btn');if(b)show(b)});
+ document.addEventListener('pointerout',e=>{if(active&&e.target.closest?.('.movie-icon-btn')===active)hide()});
+ document.addEventListener('focusin',e=>{const b=e.target.closest?.('.movie-icon-btn');if(b)show(b)});
+ document.addEventListener('focusout',e=>{if(active&&e.target===active)hide()});
+ document.addEventListener('scroll',hide,true);window.addEventListener('resize',hide);
+ document.addEventListener('click',e=>{if(e.target.closest?.('.movie-icon-btn'))hide()});
+})();
 
 /* Cinematic DNA: browser-only prototype */
 const DNA_STORAGE='fym_cinematic_dna_v1';
@@ -172,17 +334,17 @@ function dnaKey(m){return m.tmdbId?'tmdb:'+m.tmdbId:'film:'+m.title+'|'+m.year}
 function dnaPersist(){try{localStorage.setItem(DNA_STORAGE,JSON.stringify(dnaData));return true}catch(e){alert('Your browser could not save this memory. Check available storage.');return false}}
 function requireDnaAccount(){
  // Demo-only gate: this is not secure authentication.
- if(!sessionSignedOut && readProfile()){currentProfile=readProfile();return true}
+ if(!sessionSignedOut && msgUser && currentProfile)return true
  authMode=readProfile()?'login':'signup';renderAuth();openModal('auth-modal');return false;
 }
-function quickDna(m,field){if(!requireDnaAccount())return;const key=dnaKey(m),entry={...(dnaData[key]||{}),title:m.title,year:m.year,img:m.img||'',genres:m.genres||[]};entry[field]=!entry[field];dnaData[key]=entry;dnaPersist();renderMovies();if(document.getElementById('dna-section').style.display!=='none')renderDnaDashboard()}
-function openDnaMovie(m){if(!requireDnaAccount())return;dnaCurrent=m;const entry=dnaData[dnaKey(m)]||{};dnaDraft={orbit:!!entry.orbit,constellation:!!entry.constellation,rating:Number(entry.rating)||0,signals:[...(entry.signals||[])],review:entry.review||''};document.getElementById('dna-film-name').textContent=m.title+' ('+(m.year||'—')+')';document.getElementById('dna-review').value=dnaDraft.review;renderDnaEditor();openModal('dna-modal')}
+function quickDna(m,field){const key=dnaKey(m),entry={...(dnaData[key]||{}),title:m.title,year:m.year,img:m.img||'',genres:m.genres||[]};entry[field]=!entry[field];dnaData[key]=entry;if(!dnaPersist())return;renderMovies();if(document.getElementById('dna-section').style.display!=='none')renderDnaDashboard()}
+function openDnaMovie(m){if(!requireDnaAccount())return;dnaCurrent=m;const entry=dnaData[dnaKey(m)]||{};dnaDraft={orbit:!!entry.orbit,constellation:!!entry.constellation,watched:!!entry.watched,rating:Number(entry.rating)||0,signals:[...(entry.signals||[])],review:entry.review||''};document.getElementById('dna-film-name').textContent=m.title+' ('+(m.year||'—')+')';document.getElementById('dna-review').value=dnaDraft.review;renderDnaEditor();openModal('dna-modal')}
 function dnaToggle(field){if(!dnaDraft)return;dnaDraft[field]=!dnaDraft[field];renderDnaEditor()}
 function dnaRate(n){dnaDraft.rating=dnaDraft.rating===n?0:n;renderDnaEditor()}
 function dnaSignal(signal){const idx=dnaDraft.signals.indexOf(signal);if(idx>=0)dnaDraft.signals.splice(idx,1);else dnaDraft.signals.push(signal);renderDnaEditor()}
 function renderDnaEditor(){for(const field of ['orbit','constellation']){const btn=document.getElementById('dna-'+field);btn.classList.toggle('active',dnaDraft[field]);btn.setAttribute('aria-pressed',String(dnaDraft[field]));}document.getElementById('dna-stars').innerHTML=Array.from({length:5},(_,i)=>{const fill=Math.max(0,Math.min(1,dnaDraft.rating-i))*100;return `<span class="half-star"><span class="star-shape">★</span><span class="star-fill" style="width:${fill}%">★</span><button type="button" class="star-hit left" aria-label="Rate ${i+0.5} stars" onclick="dnaRate(${i+0.5})"></button><button type="button" class="star-hit right" aria-label="Rate ${i+1} stars" onclick="dnaRate(${i+1})"></button></span>`}).join('');const grid=document.getElementById('dna-signals');grid.innerHTML='';DNA_SIGNALS.forEach(signal=>{const btn=document.createElement('button');btn.type='button';btn.className='dna-signal'+(dnaDraft.signals.includes(signal)?' selected':'');btn.textContent=signal;btn.setAttribute('aria-pressed',String(dnaDraft.signals.includes(signal)));btn.addEventListener('click',()=>dnaSignal(signal));grid.appendChild(btn)})}
 function saveDnaMemory(){if(!requireDnaAccount()||!dnaCurrent||!dnaDraft)return;const key=dnaKey(dnaCurrent);dnaData[key]={...dnaDraft,review:document.getElementById('dna-review').value.trim(),title:dnaCurrent.title,year:dnaCurrent.year,img:dnaCurrent.img||'',genres:dnaCurrent.genres||[]};if(!dnaPersist())return;closeModals();renderMovies();if(document.getElementById('dna-section').style.display!=='none')renderDnaDashboard()}
-function showCinematicDNA(){if(!requireDnaAccount())return;closeModals();document.querySelector('.hero').style.display='none';document.getElementById('discover').style.display='none';document.getElementById('dna-section').style.display='block';renderDnaDashboard();document.getElementById('dna-section').scrollIntoView({behavior:'smooth'})}
+function showCinematicDNA(){document.getElementById('fym-lists-page').classList.remove('visible');if(!requireDnaAccount())return;closeModals();document.getElementById('profile-page').classList.remove('visible');document.querySelector('.hero').style.display='none';document.getElementById('discover').style.display='none';document.getElementById('dna-section').style.display='block';renderDnaDashboard();document.getElementById('dna-section').scrollIntoView({behavior:'smooth'})}
 function closeCinematicDNA(){document.querySelector('.hero').style.display='';document.getElementById('discover').style.display='';document.getElementById('dna-section').style.display='none';document.getElementById('discover').scrollIntoView({behavior:'smooth'})}
 function renderDnaTasteProfile(root){
  const totals=new Map();let contributing=0,missing=0;
@@ -221,7 +383,7 @@ function renderDnaTasteProfile(root){
  if(missing){const p=document.createElement('p');p.className='dna-hint';p.textContent=missing+' saved film(s) have no genre information available yet.';box.appendChild(p)}
  root.appendChild(box);
 }
-function renderDnaDashboard(){const root=document.getElementById('dna-dashboard');root.innerHTML='';renderDnaTasteProfile(root);const entries=Object.entries(dnaData);const sections=[['☾ My Orbit','Movies waiting for you',x=>x.orbit],['♥ My Constellation','Movies you love',x=>x.constellation],['✦ My Verdict & Memories','Your ratings, taste signals, and reviews',x=>x.rating||x.review||x.signals?.length]];for(const [name,description,filter] of sections){const box=document.createElement('div');box.className='dna-collection';const h=document.createElement('h3');h.textContent=name;box.appendChild(h);const hint=document.createElement('p');hint.className='dna-hint';hint.textContent=description;box.appendChild(hint);const matches=entries.filter(([,e])=>filter(e));if(!matches.length){const p=document.createElement('p');p.className='dna-hint';p.textContent='Your universe is waiting for its first movie.';box.appendChild(p)}for(const [key,e] of matches){const line=document.createElement('div');line.className='dna-entry';const title=document.createElement('strong');title.textContent=e.title+' ('+(e.year||'—')+')';line.appendChild(title);if(e.rating){const rating=document.createElement('span');rating.textContent=' · '+e.rating+'/5 ★';line.appendChild(rating)}if(e.signals?.length){const sig=document.createElement('p');sig.textContent=e.signals.join(' · ');line.appendChild(sig)}if(e.review){const rev=document.createElement('p');rev.textContent='“'+e.review+'”';line.appendChild(rev)}const edit=document.createElement('button');edit.textContent='Edit ✦';edit.addEventListener('click',()=>openDnaMovie(movies.find(m=>dnaKey(m)===key)||{title:e.title,year:e.year,img:e.img,genres:e.genres||[],tmdbId:key.startsWith('tmdb:')?Number(key.slice(5)):undefined}));line.appendChild(edit);box.appendChild(line)}root.appendChild(box)}}
+function renderDnaDashboard(){const root=document.getElementById('dna-dashboard');root.innerHTML='';renderDnaTasteProfile(root);const entries=Object.entries(dnaData);const sections=[['✓ Watched Films','Movies you have watched',x=>x.watched],['☾ My Orbit','Movies waiting for you',x=>x.orbit],['♥ My Constellation','Movies you love',x=>x.constellation],['✦ My Verdict & Memories','Your ratings, taste signals, and reviews',x=>x.rating||x.review||x.signals?.length]];for(const [name,description,filter] of sections){const box=document.createElement('div');box.className='dna-collection';const h=document.createElement('h3');h.textContent=name;box.appendChild(h);const hint=document.createElement('p');hint.className='dna-hint';hint.textContent=description;box.appendChild(hint);const matches=entries.filter(([,e])=>filter(e));if(!matches.length){const p=document.createElement('p');p.className='dna-hint';p.textContent='Your universe is waiting for its first movie.';box.appendChild(p)}for(const [key,e] of matches){const line=document.createElement('div');line.className='dna-entry';const title=document.createElement('strong');title.textContent=e.title+' ('+(e.year||'—')+')';line.appendChild(title);if(e.rating){const rating=document.createElement('span');rating.textContent=' · '+e.rating+'/5 ★';line.appendChild(rating)}if(e.signals?.length){const sig=document.createElement('p');sig.textContent=e.signals.join(' · ');line.appendChild(sig)}if(e.review){const rev=document.createElement('p');rev.textContent='“'+e.review+'”';line.appendChild(rev)}const edit=document.createElement('button');edit.textContent='Edit ✦';edit.addEventListener('click',()=>openDnaMovie(movies.find(m=>dnaKey(m)===key)||{title:e.title,year:e.year,img:e.img,genres:e.genres||[],tmdbId:key.startsWith('tmdb:')?Number(key.slice(5)):undefined}));line.appendChild(edit);box.appendChild(line)}root.appendChild(box)}}
 
 
 /* Beyond the Frame: 15-question explorer test and locally saved Odyssey */
@@ -361,7 +523,8 @@ async function loadMoreMovies(){if(loadingMovies||allPagesLoaded)return;loadingM
  if(added)renderMovies();}}
 loadMoreMovies();
 
-let saved=JSON.parse(localStorage.getItem('fym_saved_v1')||'[]');function toggleSaved(title,button){if(saved.includes(title)){saved=saved.filter(x=>x!==title);button.textContent='＋ Add to My List'}else{saved.push(title);button.textContent='✓ Added'}localStorage.setItem('fym_saved_v1',JSON.stringify(saved))}function showSaved(){document.getElementById('search').value='';renderMovies(movies.filter(m=>saved.includes(m.title)));document.getElementById('discover').scrollIntoView({behavior:'smooth'})}
+let saved=JSON.parse(localStorage.getItem('fym_saved_v1')||'[]');function toggleSaved(title,button){if(saved.includes(title)){saved=saved.filter(x=>x!==title);button.textContent='＋ Add to My List'}else{saved.push(title);button.textContent='✓ Added'}localStorage.setItem('fym_saved_v1',JSON.stringify(saved))}function showSaved(){fymShowLists()}
+
 function openModal(id){document.querySelectorAll('.overlay').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');if(id==='mood-modal')startQuiz('mood');if(id==='taste-modal')startQuiz('taste')}function closeModals(){document.querySelectorAll('.overlay').forEach(x=>x.classList.remove('active'))}document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModals()});document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModals()}));
 const tasteQuestions=[
 ['A movie ends. What makes you sit silently through the credits?',['It made me feel something I can’t explain.','It completely changed how I think.','Its images and atmosphere were unforgettable.','The ending surprised me in the best way.']],
@@ -469,7 +632,55 @@ function showQuiz(){
  }
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-const wheelGenres=['Sci-Fi','Romance','Thriller','Comedy','Fantasy','Drama','Mystery','Adventure'];let wheelRotation=0,wheelBusy=false;function spinWheel(){if(wheelBusy)return;const wheel=document.getElementById('wheel'),star=document.getElementById('wheel-star'),result=document.getElementById('wheel-result');const chosenIndex=Math.floor(Math.random()*wheelGenres.length),genre=wheelGenres[chosenIndex];const centerAngle=chosenIndex*45+22.5;const currentMod=((wheelRotation%360)+360)%360;const desiredMod=(360-centerAngle)%360;const delta=((desiredMod-currentMod)+360)%360+360*(5+Math.floor(Math.random()*3));wheelRotation+=delta;wheelBusy=true;star.disabled=true;star.textContent='…';result.classList.add('show');result.textContent='The stars are choosing your genre…';wheel.style.transform=`rotate(${wheelRotation}deg)`;const finish=()=>{wheelBusy=false;star.disabled=false;star.textContent='✦';wheel.removeEventListener('transitionend',finish);const matching=movies.filter(m=>m.genres.includes(genre));const m=matching.length?matching[Math.floor(Math.random()*matching.length)]:movies[Math.floor(Math.random()*movies.length)];result.innerHTML='<strong>✦ Your genre: '+escapeHtml(genre)+'</strong><br><br><strong>'+escapeHtml(m.title)+' ('+m.year+')</strong><br>★ '+m.rating.toFixed(1)+' · '+m.genres.join(', ')+'<br>'+escapeHtml(m.desc)};wheel.addEventListener('transitionend',finish);setTimeout(()=>{if(wheelBusy)finish()},5500)}document.getElementById('filters').addEventListener('submit',e=>{e.preventDefault();renderMovies();const n=document.getElementById('movie-grid').children.length;const res=document.getElementById('filter-result');res.textContent=n+' matching movie(s) among loaded movies. Results are shown below.';res.classList.add('show');closeModals();document.getElementById('discover').scrollIntoView({behavior:'smooth'})});renderMovies();
+const wheelGenres=['Sci-Fi','Romance','Thriller','Comedy','Fantasy','Drama','Mystery','Adventure'];
+let wheelRotation=0,wheelBusy=false;
+const recentWheelMovieIds=[];
+let lastWheelGenre=null;
+function spinWheel(){
+ if(wheelBusy)return;
+ const wheel=document.getElementById('wheel'),star=document.getElementById('wheel-star'),result=document.getElementById('wheel-result');
+ // Choose only genres represented in the current catalog, and avoid repeating the last genre when possible.
+ const availableGenres=wheelGenres.filter(g=>movies.some(m=>Array.isArray(m.genres)&&m.genres.includes(g)));
+ const genreChoices=availableGenres.filter(g=>g!==lastWheelGenre);
+ const pool=genreChoices.length?genreChoices:(availableGenres.length?availableGenres:wheelGenres);
+ const genre=pool[Math.floor(Math.random()*pool.length)];
+ const chosenIndex=wheelGenres.indexOf(genre);
+ const centerAngle=chosenIndex*45;
+ const currentMod=((wheelRotation%360)+360)%360;
+ const desiredMod=(360-centerAngle)%360;
+ const delta=((desiredMod-currentMod)+360)%360+360*(5+Math.floor(Math.random()*3));
+ wheelRotation+=delta;wheelBusy=true;star.disabled=true;star.textContent='…';
+ result.classList.add('show');result.textContent='The stars are choosing your genre…';
+ // Let the labels travel with the wheel during the spin.
+ wheel.querySelectorAll('.wheel-label').forEach(label=>{label.style.transform='translate(-50%,-50%)';});
+ wheel.style.transform=`rotate(${wheelRotation}deg)`;
+ let finished=false;
+ const finish=(event)=>{
+  if(event&&event.target!==wheel)return;
+  if(finished)return;finished=true;
+  // Counter-rotate text at rest so genre names never finish upside down.
+  const restingAngle=((wheelRotation%360)+360)%360;
+  wheel.querySelectorAll('.wheel-label').forEach(label=>{label.style.transform=`translate(-50%,-50%) rotate(${-restingAngle}deg)`;});
+  wheelBusy=false;star.disabled=false;star.textContent='✦';
+  wheel.removeEventListener('transitionend',finish);
+  clearTimeout(fallback);
+  lastWheelGenre=genre;
+  const matching=movies.filter(m=>Array.isArray(m.genres)&&m.genres.includes(genre));
+  const candidates=matching.length?matching:movies;
+  // Avoid movies shown in recent spins, but gracefully allow repeats if the catalog is small.
+  let fresh=candidates.filter(m=>!recentWheelMovieIds.includes(String(m.id??m.title)));
+  if(!fresh.length)fresh=candidates;
+  if(!fresh.length){result.textContent='No movies are available yet.';return;}
+  const m=fresh[Math.floor(Math.random()*fresh.length)];
+  const movieId=String(m.id??m.title);
+  recentWheelMovieIds.push(movieId);
+  if(recentWheelMovieIds.length>Math.min(12,Math.max(1,movies.length-1)))recentWheelMovieIds.shift();
+  result.innerHTML='<strong>✦ Your genre: '+escapeHtml(genre)+'</strong><br><br><strong>'+escapeHtml(m.title)+' ('+m.year+')</strong><br>★ '+m.rating.toFixed(1)+' · '+m.genres.join(', ')+'<br>'+escapeHtml(m.desc);
+ };
+ wheel.addEventListener('transitionend',finish);
+ const fallback=setTimeout(()=>finish(),5500);
+}
+document.getElementById('filters').addEventListener('submit',e=>{e.preventDefault();renderMovies();const n=document.getElementById('movie-grid').children.length;const res=document.getElementById('filter-result');res.textContent=n+' matching movie(s) among loaded movies. Results are shown below.';res.classList.add('show');closeModals();document.getElementById('discover').scrollIntoView({behavior:'smooth'})});renderMovies();
 
 // Supabase Auth is the single identity for both Profile and Signals.
 // Film profile details remain browser-local, separated by Supabase user ID.
@@ -485,13 +696,28 @@ function makeLocalProfile(user,details={}){
  currentProfile=profile;persistProfile();return profile;
 }
 async function openProfile(){
- if(!msgClient){alert('Supabase connection is unavailable. Check your internet connection and try again.');return}
- const {data,error}=await msgClient.auth.getUser();
- if(error||!data.user){authMode='login';renderAuth();openModal('auth-modal');return}
- msgUser=data.user;currentProfile=readProfile(msgUser.id)||makeLocalProfile(msgUser);sessionSignedOut=false;
- showProfileAfterAuth();
+ try{
+  const lists=document.getElementById('fym-lists-page');
+  if(lists)lists.classList.remove('visible');
+  if(typeof msgClient==='undefined'||!msgClient){
+   alert('Profile login is unavailable. Check your internet connection and reload the page.');
+   return;
+  }
+  const {data,error}=await msgClient.auth.getUser();
+  if(error)throw error;
+  if(!data?.user){authMode='login';renderAuth();openModal('auth-modal');return;}
+  msgUser=data.user;
+  currentProfile=readProfile(msgUser.id)||makeLocalProfile(msgUser);
+  sessionSignedOut=false;
+  showProfileAfterAuth();
+ }catch(err){
+  console.error('Unable to open profile:',err);
+  alert('Unable to open your profile: '+(err?.message||'Unexpected error')+'. Please check your connection and try again.');
+ }
 }
-function leaveProfile(){document.getElementById('profile-page').classList.remove('visible');document.querySelector('.hero').style.display='';document.getElementById('discover').style.display='';window.scrollTo({top:0,behavior:'smooth'})}
+function leaveProfile(){document.getElementById('profile-page').classList.remove('visible');document.querySelector('.hero').style.display='';document.getElementById('discover').style.display='';document.getElementById('dna-section').style.display='none';window.scrollTo({top:0,behavior:'smooth'})}
+function goHome(){document.getElementById('fym-lists-page').classList.remove('visible');leaveProfile();document.getElementById('search').value='';document.getElementById('filters').reset();renderMovies()}
+function goDiscover(){document.getElementById('fym-lists-page').classList.remove('visible');leaveProfile();document.getElementById('search').value='';document.getElementById('filters').reset();renderMovies();document.getElementById('discover').scrollIntoView({behavior:'smooth'})}
 function renderAuth(){const signup=authMode==='signup';document.getElementById('auth-title').textContent=signup?'Join the stars':'Welcome back';document.getElementById('auth-subtitle').textContent=signup?'Create your movie profile. Your journey starts at Gaia.':'Log in to your movie universe.';document.getElementById('auth-signup-fields').style.display=signup?'grid':'none';document.getElementById('auth-nickname').required=signup;document.getElementById('auth-realname').required=signup;document.getElementById('auth-signup-fields').style.gap='13px';document.getElementById('auth-submit').textContent=signup?'Create account':'Log in';document.getElementById('auth-toggle').textContent=signup?'Already have an account? Log in':'New here? Sign up';document.getElementById('auth-error').textContent=''}
 function toggleAuthMode(){authMode=authMode==='signup'?'login':'signup';renderAuth()}
 async function submitAuth(e){
@@ -580,5 +806,132 @@ async function uploadAvatar(e){const file=e.target.files[0];if(!file||!currentPr
 async function signOut(){if(msgClient)await msgClient.auth.signOut();msgUser=null;currentProfile=null;sessionSignedOut=true;closeMessages();leaveProfile();authMode='login';renderAuth();openModal('auth-modal')}
 </script>
 <div id="gaia-welcome" role="dialog" aria-modal="true" aria-label="Welcome Gaia" onclick="closeGaiaWelcome()"><h2>✦ Welcome, Gaia ✦</h2><p id="gaia-welcome-nickname"></p><p>A new star has been born.</p><button type="button" onclick="closeGaiaWelcome()">Enter your universe ✧</button></div>
-<section id="fym-msg-panel" class="fym-msg-panel" role="dialog" aria-modal="true" aria-label="Signals inbox"><div class="fym-msg-card fym-new-ui"><header class="fym-inbox-header"><div><div class="fym-signal-kicker">FIND YOUR MOVIE</div><h2>Signals</h2></div><button class="fym-icon-btn" onclick="closeMessages()" aria-label="Close Signals">✕</button></header><div id="fym-msg-auth" hidden><p>Please sign in to your Profile to see your Signals.</p><button onclick="closeMessages();openProfile()">Go to Profile</button></div><div id="fym-msg-app" hidden><div id="fym-msg-inbox" class="fym-inbox-screen"><div class="fym-inbox-tools"><span class="fym-section-label">YOUR CONVERSATIONS</span><button class="fym-new-signal" onclick="msgToggleFind()">＋ New Signal</button></div><div id="fym-msg-find" hidden><label for="fym-msg-search">Find someone by their exact handle</label><div class="fym-find-row"><input id="fym-msg-search" maxlength="24" placeholder="Username"><button onclick="msgFindUser()">Find</button></div></div><div id="fym-msg-users" class="fym-thread-list" aria-live="polite"></div><div id="fym-msg-empty" class="fym-empty" hidden><div class="fym-cinema-scene" aria-hidden="true"><div class="fym-screen-glow"></div><div class="fym-seat-row">▂ ▂ ▂ ▂ ▂</div></div><div class="fym-empty-star">✧</div><h3>No signals yet</h3><p>When someone sends you a Signal,<br>your conversation will appear here.</p></div></div><div id="fym-msg-chat" class="fym-chat-screen" hidden><div class="fym-chat-head"><button class="fym-icon-btn" onclick="msgBackToInbox()" aria-label="Back to inbox">←</button><div class="fym-chat-avatar" id="fym-chat-avatar">✦</div><div><strong id="fym-msg-title">Whisper</strong><div class="fym-chat-subtitle">A private Whisper</div></div></div><div id="fym-msg-history" class="fym-chat-history" aria-live="polite"></div><form class="fym-chat-compose" onsubmit="event.preventDefault();msgSend()"><input id="fym-msg-compose" maxlength="2000" placeholder="Write a Whisper…" aria-label="Write a Whisper"><button type="submit" aria-label="Send Whisper">➤</button></form></div></div><p class="fym-msg-status" id="fym-msg-status" role="status"></p></div></section><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><script src="fym-messages.js"></script></body>
+<section id="fym-msg-panel" class="fym-msg-panel" role="dialog" aria-modal="true" aria-label="Signals inbox"><div class="fym-msg-card fym-new-ui"><header class="fym-inbox-header"><div><div class="fym-signal-kicker">FIND YOUR MOVIE</div><h2>Signals</h2></div><button class="fym-icon-btn" onclick="closeMessages()" aria-label="Close Signals">✕</button></header><div id="fym-msg-auth" hidden><p>Please sign in to your Profile to see your Signals.</p><button onclick="closeMessages();openProfile()">Go to Profile</button></div><div id="fym-msg-app" hidden><div id="fym-msg-inbox" class="fym-inbox-screen"><div class="fym-inbox-tools"><span class="fym-section-label">YOUR CONVERSATIONS</span><button class="fym-new-signal" onclick="msgToggleFind()">＋ New Signal</button></div><div id="fym-msg-find" hidden><label for="fym-msg-search">Find someone by their exact handle</label><div class="fym-find-row"><input id="fym-msg-search" maxlength="24" placeholder="Username"><button onclick="msgFindUser()">Find</button></div></div><div id="fym-msg-users" class="fym-thread-list" aria-live="polite"></div><div id="fym-msg-empty" class="fym-empty" hidden><div class="fym-cinema-scene" aria-hidden="true"><div class="fym-screen-glow"></div><div class="fym-seat-row">▂ ▂ ▂ ▂ ▂</div></div><div class="fym-empty-star">✧</div><h3>No signals yet</h3><p>When someone sends you a Signal,<br>your conversation will appear here.</p></div></div><div id="fym-msg-chat" class="fym-chat-screen" hidden><div class="fym-chat-head"><button class="fym-icon-btn" onclick="msgBackToInbox()" aria-label="Back to inbox">←</button><div class="fym-chat-avatar" id="fym-chat-avatar">✦</div><div><strong id="fym-msg-title">Whisper</strong><div class="fym-chat-subtitle">A private Whisper</div></div></div><div id="fym-msg-history" class="fym-chat-history" aria-live="polite"></div><form class="fym-chat-compose" onsubmit="event.preventDefault();msgSend()"><input id="fym-msg-compose" maxlength="2000" placeholder="Write a Whisper…" aria-label="Write a Whisper"><button type="submit" aria-label="Send Whisper">➤</button></form></div></div><p class="fym-msg-status" id="fym-msg-status" role="status"></p></div></section><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><script>
+/* Configure with your Supabase Project URL and public anon/publishable key.
+   NEVER put a service_role or secret key in a browser file. */
+const FYM_SUPABASE_URL = 'https://lpowluxjkdqkhlejbafl.supabase.co';
+const FYM_SUPABASE_ANON_KEY = 'sb_publishable_k_2HphBwhWr-UfL-uj-z9g_7zZEciZe';
+const msgConfigured = FYM_SUPABASE_URL.startsWith('https://') && !FYM_SUPABASE_ANON_KEY.startsWith('YOUR_');
+const msgClient = msgConfigured && window.supabase ? window.supabase.createClient(FYM_SUPABASE_URL,FYM_SUPABASE_ANON_KEY) : null;
+let msgUser=null,msgPeer=null,msgPeerName='',msgPoll=null;
+const msgEl=id=>document.getElementById(id);
+const msgStatus=t=>msgEl('fym-msg-status').textContent=t;
+function msgError(e){msgStatus(e?.message||'Something went wrong. Please try again.')}
+function msgNode(tag,text,cls){const n=document.createElement(tag);n.textContent=text;if(cls)n.className=cls;return n}
+async function openMessages(){if(!msgClient){alert('Supabase is unavailable. Check your connection.');return}const {data,error}=await msgClient.auth.getUser();if(error||!data.user){authMode='login';renderAuth();openModal('auth-modal');return}msgUser=data.user;msgEl('fym-msg-panel').classList.add('active');await msgSession();}
+function closeMessages(){msgEl('fym-msg-panel').classList.remove('active');if(msgPoll){clearInterval(msgPoll);msgPoll=null}}
+async function msgSession(){const {data,error}=await msgClient.auth.getUser();if(error){msgError(error);return}msgUser=data.user||null;msgEl('fym-msg-auth').hidden=!!msgUser;msgEl('fym-msg-app').hidden=!msgUser;if(msgUser){await msgRefresh();if(!msgPoll)msgPoll=setInterval(()=>{if(!document.hidden&&msgEl('fym-msg-panel').classList.contains('active'))msgRefresh(true)},12000)}else if(msgPoll){clearInterval(msgPoll);msgPoll=null}}
+async function msgAuth(mode){if(!msgClient)return msgStatus('Messaging is not configured yet.');const email=msgEl('fym-msg-email').value.trim(),password=msgEl('fym-msg-password').value,handle=msgEl('fym-msg-handle').value.trim().toLowerCase();if(!email||password.length<8)return msgStatus('Enter an email and a password of at least 8 characters.');try{let result;if(mode==='signup'){if(!/^[a-z0-9_]{3,24}$/.test(handle))return msgStatus('Username: 3–24 lowercase letters, numbers or underscores.');result=await msgClient.auth.signUp({email,password,options:{data:{handle}}})}else result=await msgClient.auth.signInWithPassword({email,password});if(result.error)throw result.error;if(mode==='signup'&&!result.data.session)msgStatus('Check your email to confirm your account, then sign in.');else{msgStatus('Signed in.');await msgSession()}}catch(e){msgError(e)}}
+async function msgSignOut(){if(!msgClient)return;await msgClient.auth.signOut();msgPeer=null;msgPeerName='';await msgSession();msgStatus('Signed out of messages.')}
+function msgToggleFind(){const e=msgEl('fym-msg-find');e.hidden=!e.hidden;if(!e.hidden)msgEl('fym-msg-search').focus()}
+function msgBackToInbox(){msgPeer=null;msgPeerName='';msgEl('fym-msg-chat').hidden=true;msgEl('fym-msg-inbox').hidden=false;msgStatus('');msgRefresh(true)}
+async function msgOpenPeer(id,handle){msgPeer=id;msgPeerName=handle;msgEl('fym-msg-title').textContent=handle;msgEl('fym-chat-avatar').textContent=handle.slice(0,1).toUpperCase();msgEl('fym-msg-inbox').hidden=true;msgEl('fym-msg-chat').hidden=false;msgStatus('');await msgLoadHistory()}
+async function msgFindUser(){if(!msgUser)return;const handle=msgEl('fym-msg-search').value.trim().replace(/^@/,'').toLowerCase();if(!/^[a-z0-9_]{3,24}$/.test(handle))return msgStatus('Enter an exact username (3–24 letters, numbers or underscores).');const {data,error}=await msgClient.from('message_profiles').select('id,handle').eq('handle',handle).maybeSingle();if(error)return msgError(error);if(!data||data.id===msgUser.id)return msgStatus('No other user found with that username.');msgEl('fym-msg-find').hidden=true;await msgOpenPeer(data.id,data.handle)}
+async function msgRefresh(silent=false){if(!msgUser)return;const {data,error}=await msgClient.from('private_messages').select('sender_id,recipient_id,body,created_at').or(`sender_id.eq.${msgUser.id},recipient_id.eq.${msgUser.id}`).order('created_at',{ascending:false}).limit(300);if(error){if(!silent)msgError(error);return}const latest=new Map();for(const m of data||[]){const peer=m.sender_id===msgUser.id?m.recipient_id:m.sender_id;if(!latest.has(peer))latest.set(peer,m)}const ids=[...latest.keys()];const users=ids.length?await msgClient.from('message_profiles').select('id,handle').in('id',ids):{data:[],error:null};if(users.error){if(!silent)msgError(users.error);return}const handles=new Map((users.data||[]).map(u=>[u.id,u.handle]));const list=msgEl('fym-msg-users');list.replaceChildren();msgEl('fym-msg-empty').hidden=ids.length>0;for(const id of ids){const m=latest.get(id),handle=handles.get(id)||'Movie lover';const btn=document.createElement('button');btn.type='button';btn.className='fym-msg-thread';const avatar=msgNode('span',handle[0].toUpperCase(),'fym-thread-avatar');const content=msgNode('span','','fym-thread-content');const top=msgNode('span','','fym-thread-top');top.append(msgNode('strong',handle),msgNode('span',new Date(m.created_at).toLocaleDateString(undefined,{month:'short',day:'numeric'}),'fym-thread-time'));content.append(top,msgNode('div',(m.sender_id===msgUser.id?'You: ':'')+m.body,'fym-thread-preview'));btn.append(avatar,content);btn.onclick=()=>msgOpenPeer(id,handle);list.append(btn)}if(msgPeer&& !msgEl('fym-msg-chat').hidden)await msgLoadHistory()}
+async function msgLoadHistory(){if(!msgUser||!msgPeer)return;const {data,error}=await msgClient.from('private_messages').select('id,sender_id,recipient_id,body,created_at').or(`and(sender_id.eq.${msgUser.id},recipient_id.eq.${msgPeer}),and(sender_id.eq.${msgPeer},recipient_id.eq.${msgUser.id})`).order('created_at',{ascending:true}).limit(100);if(error)return msgError(error);const history=msgEl('fym-msg-history');const atBottom=history.scrollHeight-history.scrollTop-history.clientHeight<100;history.replaceChildren();for(const m of data||[]){const bubble=msgNode('div',m.body,'fym-msg-bubble'+(m.sender_id===msgUser.id?' mine':''));bubble.appendChild(msgNode('div',new Date(m.created_at).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}),'fym-msg-note'));history.appendChild(bubble)}if(!(data||[]).length)history.appendChild(msgNode('p','Start your Whisper.','fym-msg-note'));if(atBottom)history.scrollTop=history.scrollHeight}
+async function msgSend(){if(!msgUser||!msgPeer)return msgStatus('Choose a recipient first.');const body=msgEl('fym-msg-compose').value.trim();if(!body||body.length>2000)return msgStatus('Write a message of up to 2,000 characters.');const {error}=await msgClient.from('private_messages').insert({sender_id:msgUser.id,recipient_id:msgPeer,body});if(error)return msgError(error);msgEl('fym-msg-compose').value='';msgStatus('');await msgRefresh(true)}
+
+</script><script>
+/* Collection manager: browser-local, with separate collection page and per-film picker. */
+const FYM_LISTS_KEY='fym_custom_lists_v1';
+let fymPendingFilm=null,fymActiveList='Watch Later';
+function fymReadLists(){try{const raw=JSON.parse(localStorage.getItem(FYM_LISTS_KEY)||'{}');return raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{}}catch(e){return {}}}
+function fymWriteLists(lists){try{localStorage.setItem(FYM_LISTS_KEY,JSON.stringify(lists));return true}catch(e){alert('Could not save your list in this browser.');return false}}
+function fymLists(){const lists=fymReadLists();if(!Array.isArray(lists['Watch Later']))lists['Watch Later']=[];return lists}
+function fymOpenListPicker(m){fymPendingFilm=m;document.getElementById('fym-pick-film').textContent=m.title;document.getElementById('fym-new-list-name').value='';document.getElementById('fym-new-list-form').hidden=true;document.getElementById('fym-add-list-toggle').setAttribute('aria-expanded','false');fymRenderPicker();openModal('fym-pick-list-modal')}
+function fymRenderPicker(){const lists=fymLists(),box=document.getElementById('fym-list-choices');box.innerHTML='';const key=dnaKey(fymPendingFilm);Object.keys(lists).forEach(name=>{const selected=lists[name].includes(key)||(name==='Watch Later'&&!!(dnaData[key]||{}).orbit);const btn=document.createElement('button');btn.type='button';btn.className='fym-list-choice';const title=document.createElement('span');title.textContent=name;const state=document.createElement('span');state.textContent=selected?'✓ Saved':'＋ Add';btn.append(title,state);btn.onclick=()=>fymToggleFilmList(name);box.appendChild(btn)});fymRenderPickerPreview()}
+function fymRenderPickerPreview(){
+ const box=document.getElementById('fym-list-preview');if(!box)return;
+ const lists=fymLists(),keys=new Set(Object.values(lists).flat());
+ Object.entries(dnaData).forEach(([k,v])=>{if(v&&v.orbit)keys.add(k)});
+ const items=[...keys].map(k=>dnaData[k]||movies.find(m=>dnaKey(m)===k)).filter(m=>m&&m.title);
+ box.replaceChildren();
+ const header=document.createElement('div');header.className='fym-preview-header';
+ const heading=document.createElement('span');heading.className='fym-preview-head';heading.textContent='Your saved films · '+items.length;
+ const controls=document.createElement('div');controls.className='fym-preview-controls';
+ const previous=document.createElement('button'),next=document.createElement('button');
+ previous.type=next.type='button';previous.textContent='‹';next.textContent='›';
+ previous.setAttribute('aria-label','Previous saved movies');next.setAttribute('aria-label','Next saved movies');
+ controls.append(previous,next);header.append(heading,controls);box.appendChild(header);
+ if(!items.length){controls.hidden=true;const empty=document.createElement('p');empty.className='fym-preview-empty';empty.textContent='Your saved films will appear here.';box.appendChild(empty);return}
+ const strip=document.createElement('div');strip.className='fym-preview-strip';
+ items.slice().reverse().forEach(m=>{const item=document.createElement('div');item.className='fym-preview-film';item.title=m.title;
+ if(m.img){const img=document.createElement('img');img.src=m.img;img.alt=m.title+' poster';img.loading='lazy';item.appendChild(img)}else{item.textContent=m.title}
+ const name=document.createElement('span');name.className='fym-preview-title';name.textContent=m.title;item.appendChild(name);strip.appendChild(item)});
+ box.appendChild(strip);
+ const update=()=>{previous.disabled=strip.scrollLeft<=3;next.disabled=strip.scrollLeft+strip.clientWidth>=strip.scrollWidth-3};
+ previous.onclick=()=>strip.scrollBy({left:-strip.clientWidth*.8,behavior:'smooth'});
+ next.onclick=()=>strip.scrollBy({left:strip.clientWidth*.8,behavior:'smooth'});
+ strip.addEventListener('scroll',update,{passive:true});requestAnimationFrame(update);
+}
+function fymToggleFilmList(name){if(!fymPendingFilm)return;const m=fymPendingFilm,key=dnaKey(m),lists=fymLists(),arr=lists[name]||[];const has=arr.includes(key)||(name==='Watch Later'&&!!(dnaData[key]||{}).orbit);lists[name]=has?arr.filter(x=>x!==key):[...arr.filter(x=>x!==key),key];if(!fymWriteLists(lists))return;if(name==='Watch Later'){const entry={...(dnaData[key]||{}),title:m.title,year:m.year,img:m.img||'',genres:m.genres||[]};entry.orbit=!has;dnaData[key]=entry;dnaPersist()}renderMovies();fymRenderPicker()}
+function fymToggleNewList(){const panel=document.getElementById('fym-new-list-form');panel.hidden=!panel.hidden;document.getElementById('fym-add-list-toggle').setAttribute('aria-expanded',String(!panel.hidden));if(!panel.hidden)document.getElementById('fym-new-list-name').focus()}
+function fymCreateAndSaveList(){const name=document.getElementById('fym-new-list-name').value.trim();if(!name)return alert('Please enter a list name.');if(name.length>45)return;const lists=fymLists();if(Object.keys(lists).some(x=>x.toLowerCase()===name.toLowerCase()))return alert('A list with this name already exists.');lists[name]=[dnaKey(fymPendingFilm)];if(!fymWriteLists(lists))return;closeModals();renderMovies()}
+function fymShowLists(){closeModals();document.getElementById('profile-page').classList.remove('visible');document.getElementById('dna-section').style.display='none';document.querySelector('.hero').style.display='none';document.getElementById('discover').style.display='none';document.getElementById('fym-lists-page').classList.add('visible');fymRenderLists();window.scrollTo({top:0,behavior:'smooth'})}
+function fymRenderLists(){const lists=fymLists(),keys=new Set(Object.keys(lists));keys.add('Watch Later');if(!keys.has(fymActiveList))fymActiveList='Watch Later';const tabs=document.getElementById('fym-list-tabs'),grid=document.getElementById('fym-list-grid');tabs.innerHTML='';grid.innerHTML='';[...keys].forEach(name=>{const btn=document.createElement('button');btn.type='button';btn.textContent=name;btn.className=name===fymActiveList?'active':'';btn.onclick=()=>{fymActiveList=name;fymRenderLists()};tabs.appendChild(btn)});const entries=Object.entries(dnaData).filter(([k,v])=>v&&v.title);const keysForList=new Set(lists[fymActiveList]||[]);if(fymActiveList==='Watch Later')entries.filter(([k,v])=>v.orbit).forEach(([k])=>keysForList.add(k));const selected=[...keysForList].map(k=>({key:k,film:dnaData[k]||movies.find(m=>dnaKey(m)===k)})).filter(x=>x.film&&x.film.title);if(!selected.length){grid.innerHTML='<p class="muted">No films here yet. Tap the bookmark on a movie to add it to a collection.</p>';return}selected.forEach(({key,film})=>{const card=document.createElement('div');card.className='fym-list-film';if(film.img){const img=document.createElement('img');img.src=film.img;img.alt=film.title+' poster';card.appendChild(img)}const detail=document.createElement('div');detail.className='details';const title=document.createElement('div');title.textContent=film.title;const remove=document.createElement('button');remove.textContent='Remove from list';remove.onclick=()=>{const all=fymLists();all[fymActiveList]=(all[fymActiveList]||[]).filter(k=>k!==key);fymWriteLists(all);if(fymActiveList==='Watch Later'&&dnaData[key]){dnaData[key].orbit=false;dnaPersist()}fymRenderLists()};detail.append(title,remove);card.appendChild(detail);grid.appendChild(card)})}
+</script>
+<script>
+(function(){
+  function setup(){
+    const overlay=document.getElementById('fym-pick-list-modal');
+    const panel=overlay&&overlay.querySelector('.modal');
+    if(!panel)return;
+    const handle=document.createElement('div');
+    handle.className='fym-drag-handle';
+    handle.title='Drag to move this panel';
+    handle.setAttribute('aria-label','Drag to move saved lists panel');
+    panel.prepend(handle);
+    let startX=0,startY=0,baseX=0,baseY=0,active=false;
+    const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+    handle.addEventListener('pointerdown',e=>{
+      if(e.button!==0)return;
+      const r=panel.getBoundingClientRect();
+      // Convert its current location into viewport-anchored coordinates.
+      panel.style.position='fixed';
+      panel.style.left=r.left+'px';
+      panel.style.top=r.top+'px';
+      panel.style.margin='0';
+      panel.style.transform='none';
+      panel.style.right='auto';
+      baseX=r.left;baseY=r.top;startX=e.clientX;startY=e.clientY;
+      active=true;handle.setPointerCapture(e.pointerId);e.preventDefault();
+    });
+    handle.addEventListener('pointermove',e=>{
+      if(!active)return;
+      const maxX=Math.max(0,innerWidth-panel.offsetWidth);
+      const maxY=Math.max(0,innerHeight-panel.offsetHeight);
+      panel.style.left=clamp(baseX+e.clientX-startX,0,maxX)+'px';
+      panel.style.top=clamp(baseY+e.clientY-startY,0,maxY)+'px';
+    });
+    const end=()=>{active=false};
+    handle.addEventListener('pointerup',end);
+    handle.addEventListener('pointercancel',end);
+    // Let people drag the saved poster row with mouse or touch as well.
+    overlay.addEventListener('pointerdown',e=>{
+      const strip=e.target.closest('.fym-preview-strip');
+      if(!strip||e.button!==0)return;
+      strip.dataset.dragX=e.clientX;
+      strip.dataset.scrollX=strip.scrollLeft;
+      strip.dataset.dragging='1';
+      strip.classList.add('fym-grabbing');
+      if(e.pointerType==='mouse')strip.setPointerCapture(e.pointerId);
+    });
+    overlay.addEventListener('pointermove',e=>{
+      const strip=e.target.closest('.fym-preview-strip')||
+        overlay.querySelector('.fym-preview-strip.fym-grabbing');
+      if(!strip||strip.dataset.dragging!=='1')return;
+      if(e.pointerType==='touch')return; // Native touch scrolling
+      strip.scrollLeft=Number(strip.dataset.scrollX)-(e.clientX-Number(strip.dataset.dragX));
+    });
+    const release=()=>overlay.querySelectorAll('.fym-preview-strip.fym-grabbing').forEach(strip=>{
+      strip.dataset.dragging='0';strip.classList.remove('fym-grabbing');
+    });
+    overlay.addEventListener('pointerup',release);
+    overlay.addEventListener('pointercancel',release);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);
+  else setup();
+})();
+</script>
+</body>
 </html>
