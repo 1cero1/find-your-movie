@@ -532,31 +532,27 @@ function openTasteFilm(index){
  back.onclick=()=>{document.getElementById('film-page-modal').classList.remove('active');document.getElementById('taste-modal').classList.add('active')};
  target.prepend(back);
 }
-/* Film Universe extras: credits from supported Worker responses, without exposing a TMDB token. */
+/* Film Universe: fetch details and credits from the existing Cloudflare Worker. */
 const filmCreditsCache=new Map();
 async function loadFilmCredits(movie){
  const host=document.getElementById('film-credits-content');
  if(!host)return;
- if(!movie.tmdbId){host.textContent='Cast and director details are not available for this locally curated film yet.';return;}
  const id=Number(movie.tmdbId);
- if(!Number.isSafeInteger(id)||id<=0)return;
+ if(!Number.isSafeInteger(id)||id<=0){host.textContent='Detailed credits are available for films loaded from TMDB. Try searching for this film in the movie catalog.';return;}
  if(filmCreditsCache.has(id)){renderFilmCredits(filmCreditsCache.get(id),host);return;}
+ const controller=new AbortController();
+ const timeout=setTimeout(()=>controller.abort(),9000);
  try{
-  // Worker support varies: only accept responses containing actual credits.
-  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),6500);
-  let payload=null;
-  try{
-   for(const url of [TMDB_WORKER+'?movie_id='+id+'&append_to_response=credits',TMDB_WORKER+'?id='+id+'&append_to_response=credits']){
-    const response=await fetch(url,{signal:controller.signal});
-    if(!response.ok)continue;
-    const data=await response.json();
-    if(data&&((data.credits&&Array.isArray(data.credits.cast))||Array.isArray(data.cast))){payload=data;break;}
-   }
-  }finally{clearTimeout(timeout)}
-  if(document.getElementById('film-credits-content')!==host)return;
-  if(payload){filmCreditsCache.set(id,payload);renderFilmCredits(payload,host)}
-  else host.textContent='Cast and director details are not available through the current movie service yet.';
- }catch(e){if(document.getElementById('film-credits-content')===host)host.textContent='Could not load credits right now.';}
+  const response=await fetch(TMDB_WORKER+'?movie_id='+encodeURIComponent(id),{signal:controller.signal});
+  if(!response.ok)throw new Error('Movie details request failed: '+response.status);
+  const payload=await response.json();
+  if(!payload||(!payload.credits&&!Array.isArray(payload.cast)))throw new Error('Credits missing from response');
+  filmCreditsCache.set(id,payload);
+  if(host.isConnected&&document.getElementById('film-credits-content')===host)renderFilmCredits(payload,host);
+ }catch(error){
+  if(host.isConnected&&document.getElementById('film-credits-content')===host){host.textContent=controller.signal.aborted?'Movie details took too long to load. Please try opening this film again.':'Could not load film credits right now.';}
+  console.warn('Film details:',error.message);
+ }finally{clearTimeout(timeout);}
 }
 function renderFilmCredits(data,host){
  const credits=data.credits||data;
@@ -564,14 +560,28 @@ function renderFilmCredits(data,host){
  const cast=Array.isArray(credits.cast)?credits.cast:[];
  const directors=crew.filter(p=>p.job==='Director').map(p=>p.name).filter(Boolean);
  host.replaceChildren();
+ const details=document.createElement('p');
+ const parts=[];
+ if(Number(data.runtime)>0)parts.push(Number(data.runtime)+' min');
+ if(data.release_date)parts.push('Released '+data.release_date);
+ if(parts.length){details.textContent=parts.join(' · ');details.className='muted';host.append(details);}
  const director=document.createElement('p');director.textContent='Director: '+(directors.join(', ')||'Not available');host.append(director);
  const heading=document.createElement('p');heading.textContent='Cast';heading.style.fontWeight='bold';host.append(heading);
- if(!cast.length){const empty=document.createElement('p');empty.textContent='Cast information not available.';host.append(empty);return;}
- const list=document.createElement('div');list.className='film-credits-cast';
- cast.slice(0,10).forEach(person=>{const item=document.createElement('div');item.className='film-credits-person';
- if(typeof person.profile_path==='string'&&/^\/[a-zA-Z0-9]+$/.test(person.profile_path)){const img=document.createElement('img');img.src='https://image.tmdb.org/t/p/w185'+person.profile_path;img.alt='';img.loading='lazy';item.append(img)}
- const text=document.createElement('span');text.textContent=(person.name||'Unknown')+(person.character?' · '+person.character:'');item.append(text);list.append(item)});
- host.append(list);
+ if(!cast.length){const empty=document.createElement('p');empty.textContent='Cast information not available.';host.append(empty);}
+ else{
+  const list=document.createElement('div');list.className='film-credits-cast';
+  cast.slice(0,10).forEach(person=>{
+   const item=document.createElement('div');item.className='film-credits-person';
+   if(typeof person.profile_path==='string'&&/^\/[a-zA-Z0-9]+$/.test(person.profile_path)){
+    const img=document.createElement('img');img.src='https://image.tmdb.org/t/p/w185'+person.profile_path;img.alt='';img.loading='lazy';item.append(img);
+   }
+   const name=document.createElement('span');name.textContent=(person.name||'Unknown')+(person.character?' · '+person.character:'');item.append(name);list.append(item);
+  });
+  host.append(list);
+ }
+ const videos=Array.isArray(data.videos?.results)?data.videos.results:[];
+ const trailer=videos.find(v=>v.site==='YouTube'&&v.type==='Trailer'&&v.official&&/^[a-zA-Z0-9_-]{11}$/.test(v.key))||videos.find(v=>v.site==='YouTube'&&v.type==='Trailer'&&/^[a-zA-Z0-9_-]{11}$/.test(v.key));
+ if(trailer){const link=document.createElement('a');link.href='https://www.youtube.com/watch?v='+trailer.key;link.target='_blank';link.rel='noopener noreferrer';link.textContent='▶ Watch trailer on YouTube';link.style.display='inline-block';link.style.marginTop='16px';host.append(link);}
 }
 
 /* Film Universe: dedicated in-app film detail view for loaded TMDB movies. */
