@@ -278,6 +278,12 @@
 #taste-modal #taste-result .taste-disclaimer{font:12px/1.6 Arial,sans-serif;color:#9eb9d3;margin-top:17px}
 @media(max-width:520px){#taste-modal .taste-film{padding:11px;gap:8px}#taste-modal .taste-film-body strong{font-size:14px}}
 </style>
+<style>
+.taste-feedback{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 3px}
+.taste-feedback button{font:inherit;font-size:11px;border:1px solid rgba(150,190,225,.35);border-radius:8px;background:rgba(35,67,93,.25);color:inherit;padding:7px 9px;cursor:pointer}
+.taste-feedback button:hover{border-color:#86caff;background:rgba(70,130,170,.25)}
+.taste-match-reason{font-size:12px;opacity:.8;font-style:italic}
+</style>
 </head>
 <body>
 <div id="stars"></div><div id="stars2"></div><div class="shooting-star"></div>
@@ -731,7 +737,7 @@ const list=document.getElementById('ody-film-list');odyState.journey.forEach((na
 const TMDB_WORKER='https://find-your-movie-api.cerennelif18.workers.dev/';
 const TMDB_GENRES={28:'Action',12:'Adventure',16:'Animation',35:'Comedy',80:'Crime',99:'Documentary',18:'Drama',10751:'Family',14:'Fantasy',36:'History',27:'Horror',10402:'Music',9648:'Mystery',10749:'Romance',878:'Sci-Fi',10770:'TV Movie',53:'Thriller',10752:'War',37:'Western'};
 let nextMoviePage=1,loadingMovies=false,allPagesLoaded=false;
-function normalizeTMDBMovie(m){return {title:m.title||m.original_title||'Untitled',year:Number((m.release_date||'').slice(0,4))||0,rating:Number(m.vote_average)||0,genres:(m.genre_ids||[]).map(id=>TMDB_GENRES[id]).filter(Boolean),moods:[],theme:'',pace:'',desc:m.overview||'No description available.',img:m.poster_path?'https://image.tmdb.org/t/p/w500'+m.poster_path:'',tmdbId:m.id}}
+function normalizeTMDBMovie(m){return {title:m.title||m.original_title||'Untitled',year:Number((m.release_date||'').slice(0,4))||0,rating:Number(m.vote_average)||0,genres:(m.genre_ids||[]).map(id=>TMDB_GENRES[id]).filter(Boolean),moods:[],theme:'',pace:'',desc:m.overview||'No description available.',img:m.poster_path?'https://image.tmdb.org/t/p/w500'+m.poster_path:'',tmdbId:m.id,voteCount:Number(m.vote_count)||0,popularity:Number(m.popularity)||0}}
 async function loadMoreMovies(){if(loadingMovies||allPagesLoaded)return;loadingMovies=true;
  const btn=document.getElementById('load-more'),status=document.getElementById('catalog-status');btn.disabled=true;btn.textContent='Loading movies…';
  let added=0,failed=false;
@@ -789,22 +795,80 @@ const TASTE_STYLE_MAP=[
 [0,3,2,0],[1,1,3,0],[3,0,2,2],[2,3,1,0],
 [1,2,0,3],[1,2,0,3],[3,0,1,2],[0,2,1,2]
 ];
+// Taste Test v2: genre + storytelling signals, quality controls and diversified selection.
+const TASTE_FEEDBACK_KEY='filmlerrs_taste_feedback_v2';
+function tasteFeedback(){try{return JSON.parse(localStorage.getItem(TASTE_FEEDBACK_KEY)||'{}')}catch(e){return {}}}
+function tasteMovieKey(m){return m.tmdbId?'tmdb:'+m.tmdbId:'film:'+String(m.title).toLowerCase()+'|'+m.year}
+function setTasteFeedback(key,value){const feedback=tasteFeedback();feedback[key]=value;localStorage.setItem(TASTE_FEEDBACK_KEY,JSON.stringify(feedback));if(quizType==='taste'&&quizIndex>=12)showQuiz()}
+function tasteSignals(answers){
+ const options=answers.map((a,i)=>tasteQuestions[i][1].indexOf(a));
+ return {slow:options[7]===0||options[7]===3,fast:options[7]===1,nonlinear:options[7]===2,
+  ambiguity:options[5]===0||options[5]===3,closure:options[5]===2,
+  adventurous:options[9]===1||options[10]===0,indie:options[9]===2,
+  classic:options[9]===0||options[10]===2,international:options[8]>=0&&options[8]!==undefined,
+  emotion:options[0]===0||options[11]===0,ideas:options[0]===1||options[11]===2,
+  atmosphere:options[0]===2||options[6]===3,surprise:options[0]===3||options[7]===1};
+}
 function tasteProfile(answers){
  const genreScores={},styles=[0,0,0,0];
  answers.forEach((answer,i)=>{
   const option=tasteQuestions[i][1].indexOf(answer);
   if(option<0)return;
-  const tags=TASTE_GENRE_WEIGHTS[i][option];
-  tags.forEach((g,j)=>{genreScores[g]=(genreScores[g]||0)+(j===0?3:2)});
+  TASTE_GENRE_WEIGHTS[i][option].forEach((g,j)=>{genreScores[g]=(genreScores[g]||0)+(j===0?3:2)});
   styles[TASTE_STYLE_MAP[i][option]]+=2;
  });
  const ranked=Object.entries(genreScores).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
  const styleOrder=styles.map((v,i)=>({name:TASTE_STYLE_LABELS[i],score:v})).sort((a,b)=>b.score-a.score);
- const picks=movies.map(m=>{
-  const match=(m.genres||[]).reduce((total,g)=>total+(genreScores[g]||0),0);
-  // A rating is only a small tie-breaker, not the primary recommendation signal.
-  return {movie:m,score:match+Math.min(1,Number(m.rating||0)/10)};
- }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.movie.title.localeCompare(b.movie.title)).slice(0,5);
+ const signals=tasteSignals(answers),feedback=tasteFeedback(),now=new Date().getFullYear();
+ const candidates=movies.filter(m=>{
+  const year=Number(m.year)||0,desc=String(m.desc||'');
+  return year>=1920&&year<=now&&desc.length>=45&&Array.isArray(m.genres)&&m.genres.length>0&&feedback[tasteMovieKey(m)]!=='disliked'&&feedback[tasteMovieKey(m)]!=='seen';
+ }).map(m=>{
+  const genres=m.genres||[],desc=(m.desc||'').toLowerCase(),theme=(m.theme||'').toLowerCase(),moods=(m.moods||[]).join(' ').toLowerCase(),pace=(m.pace||'').toLowerCase();
+  const genreMatch=genres.reduce((sum,g)=>sum+(genreScores[g]||0),0);
+  if(!genreMatch)return null;
+  const text=desc+' '+theme+' '+moods;
+  let bonus=0;
+  const add=(condition,pattern,weight)=>{if(condition&&pattern.test(text))bonus+=weight};
+  add(signals.emotion,/love|grief|loss|family|friendship|relationship|heart|memory|reunion|identity/,5);
+  add(signals.ideas,/reality|time|future|science|existence|consciousness|philosoph|identity|moral|society/,5);
+  add(signals.atmosphere,/dream|magical|wonder|beautiful|mysterious|haunt|fantasy|journey/,4);
+  add(signals.surprise,/secret|twist|unexpected|mystery|conspiracy|disappear|investigat|reveal/,5);
+  add(signals.nonlinear,/memory|past|time|reconstruct|puzzle|flashback/,4);
+  add(signals.ambiguity,/mystery|uncertain|unanswered|ambiguous|secret/,3);
+  add(signals.closure,/hope|reunite|overcome|rescue|triumph/,2);
+  add(signals.slow,/intimate|quiet|reflection|life|relationship|family/,2);
+  add(signals.fast,/escape|chase|race|danger|battle|survival|mission/,3);
+  if(signals.fast&&pace.includes('fast'))bonus+=3;
+  if(signals.slow&&pace.includes('slow'))bonus+=3;
+  if(signals.classic&&m.year<1990)bonus+=3;
+  if(signals.indie&&Number(m.popularity||0)<40)bonus+=2;
+  if(signals.adventurous&&genres.some(g=>['Fantasy','Mystery','Sci-Fi','Adventure'].includes(g)))bonus+=2;
+  const rating=Math.max(0,Math.min(10,Number(m.rating)||0));
+  // Metadata confidence is a small bonus, not a popularity contest.
+  const quality=rating>=6.5?Math.min(3,(rating-6)*1.5):rating<5&&rating>0?-3:0;
+  const votes=Number(m.voteCount||0);
+  const confidence=m.tmdbId&&votes>0?Math.min(2,Math.log10(votes+1)*0.55):0;
+  const score=genreMatch*0.7+bonus+quality+confidence+(feedback[tasteMovieKey(m)]==='liked'?6:0);
+  return {movie:m,score,reason:bonus>0?'Matches your story and atmosphere preferences':'Matches your strongest genre preferences'};
+ }).filter(Boolean).sort((a,b)=>b.score-a.score||a.movie.title.localeCompare(b.movie.title));
+ // Greedy reranking: penalize repeated decades, genre combinations and very recent films.
+ const picks=[],used=new Set();
+ while(picks.length<5&&candidates.length){
+  let winner=-1,best=-Infinity;
+  candidates.forEach((candidate,i)=>{
+   const m=candidate.movie,key=tasteMovieKey(m);
+   if(used.has(key))return;
+   const decade=Math.floor(m.year/10);
+   const sameDecade=picks.filter(p=>Math.floor(p.movie.year/10)===decade).length;
+   const recent=picks.filter(p=>p.movie.year>=now-2).length;
+   const overlap=picks.reduce((sum,p)=>sum+(m.genres.filter(g=>p.movie.genres.includes(g)).length/Math.max(1,m.genres.length)),0);
+   const adjusted=candidate.score-sameDecade*8-overlap*4-(m.year>=now-2?recent*9:0);
+   if(adjusted>best){best=adjusted;winner=i}
+  });
+  if(winner<0)break;
+  picks.push(candidates[winner]);used.add(tasteMovieKey(candidates[winner].movie));
+ }
  return {ranked,styleOrder,picks};
 }
 let quizType='',quizIndex=0,quizAnswers=[];function startQuiz(type){quizType=type;quizIndex=0;quizAnswers=[];showQuiz()}
@@ -850,7 +914,7 @@ function showQuiz(){
   }else{
    const profile=tasteProfile(quizAnswers);
    const top=profile.ranked.slice(0,4),best=profile.styleOrder.slice(0,2).map(x=>x.name.toLowerCase());
-   res.innerHTML=`<div class="taste-results-layout"><p class="ody-caption">YOUR CINEMATIC UNIVERSE</p><h3 class="ody-title">${escapeHtml(profile.styleOrder[0].name)} Explorer ✦</h3><p>Your answers suggest you are drawn to <strong>${escapeHtml(best.join(' and '))}</strong>. This is a starting point, not a fixed personality label.</p><h4 class="taste-section-heading">Your strongest genre signals</h4><div class="taste-genre-list">${top.map(([g,n])=>`<div class="taste-genre-row"><div class="taste-genre-label"><span>${escapeHtml(g)}</span><span>${n} points</span></div><div class="taste-genre-track"><div class="taste-genre-fill" style="width:${Math.round(n/(top[0]?.[1]||1)*100)}%"></div></div></div>`).join('')}</div><h4 class="taste-section-heading">Five films for your universe</h4><div class="taste-film-list">${profile.picks.map(({movie:m},i)=>`<div class="taste-film"><div class="taste-film-number">${i+1}</div><div class="taste-film-body"><strong>${escapeHtml(m.title)} <span class="taste-film-year">(${m.year||'—'})</span></strong><div class="meta">${escapeHtml(m.genres.join(' · '))}</div><p>${escapeHtml(m.desc||'')}</p></div></div>`).join('')}</div><p class="dna-hint taste-disclaimer">Recommendations are based on genre matches among movies currently loaded on this page. Load more movies for wider selection. Results are calculated locally in your browser.</p></div>`;
+   res.innerHTML=`<div class="taste-results-layout"><p class="ody-caption">YOUR CINEMATIC UNIVERSE</p><h3 class="ody-title">${escapeHtml(profile.styleOrder[0].name)} Explorer ✦</h3><p>Your answers suggest you are drawn to <strong>${escapeHtml(best.join(' and '))}</strong>. This is a starting point, not a fixed personality label.</p><h4 class="taste-section-heading">Your strongest genre signals</h4><div class="taste-genre-list">${top.map(([g,n])=>`<div class="taste-genre-row"><div class="taste-genre-label"><span>${escapeHtml(g)}</span><span>${n} points</span></div><div class="taste-genre-track"><div class="taste-genre-fill" style="width:${Math.round(n/(top[0]?.[1]||1)*100)}%"></div></div></div>`).join('')}</div><h4 class="taste-section-heading">Five films for your universe</h4><div class="taste-film-list">${profile.picks.map(({movie:m},i)=>`<div class="taste-film"><div class="taste-film-number">${i+1}</div><div class="taste-film-body"><strong>${escapeHtml(m.title)} <span class="taste-film-year">(${m.year||'—'})</span></strong><div class="meta">${escapeHtml(m.genres.join(' · '))}</div><p>${escapeHtml(m.desc||'')}</p><p class="taste-match-reason">${escapeHtml(profile.picks[i].reason)}</p><div class="taste-feedback"><button type="button" onclick="setTasteFeedback('${tasteMovieKey(m)}','liked')">♡ Interested</button><button type="button" onclick="setTasteFeedback('${tasteMovieKey(m)}','seen')">✓ Already seen</button><button type="button" onclick="setTasteFeedback('${tasteMovieKey(m)}','disliked')">✕ Not for me</button></div></div></div>`).join('')}</div><p class="dna-hint taste-disclaimer">Recommendations combine your genre answers, story preferences and variety across decades. Feedback is saved in this browser. Load more TMDB movies to widen the selection.</p></div>`;
    const explore=document.createElement('button');explore.className='primary';explore.textContent='Explore my five films ✦';explore.onclick=()=>{document.getElementById('search').value='';document.getElementById('filters').reset();closeModals();renderMovies(profile.picks.map(x=>x.movie));document.getElementById('discover').scrollIntoView({behavior:'smooth'})};box.appendChild(explore);
   }
   res.classList.add('show');const again=document.createElement('button');again.className='choice';again.textContent='Take the test again';again.onclick=()=>startQuiz(quizType);box.appendChild(again);
