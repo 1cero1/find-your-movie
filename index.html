@@ -246,7 +246,39 @@
 #mood-v2-frame{display:block;width:100%;height:100%;border:0;background:#080e1c}
 #mood-modal .mood-v2-close{position:absolute;right:10px;top:9px;z-index:5;width:34px;height:34px;border:1px solid #4b6786;border-radius:50%;background:#0b1a2e;color:#e9f6ff;font-size:23px;cursor:pointer}
 @media(max-width:650px){#mood-modal{padding:4px}#mood-modal .mood-v2-modal{width:96%;height:84dvh;max-height:84dvh;border-radius:12px}}
-</style></head>
+</style><style>
+/* Taste Test: compact, readable question layout (scoped to Taste Test only). */
+#taste-modal .modal{width:min(580px,100%);padding:clamp(18px,3vw,28px)}
+#taste-modal #taste-title{font-size:clamp(19px,2.5vw,23px);line-height:1.3;margin-bottom:8px}
+#taste-modal .taste-question{font:600 clamp(17px,2.3vw,21px)/1.45 Inter,Arial,sans-serif;color:#edf4ff;letter-spacing:-.015em;margin:12px 0 16px;max-width:50ch}
+#taste-modal #taste-choices{display:flex;flex-direction:column;gap:9px}
+#taste-modal #taste-choices .choice{width:100%;padding:12px 14px;min-height:44px;font:500 14px/1.45 Inter,Arial,sans-serif;border-radius:11px;text-align:left;white-space:normal}
+#taste-modal .ody-caption{font-size:11px;line-height:1.5;margin:10px 0 6px}
+#taste-modal .ody-progress{margin:12px 0 8px}
+@media(max-width:520px){#taste-modal .modal{padding:18px 16px}#taste-modal .taste-question{font-size:18px}#taste-modal #taste-choices .choice{font-size:14px;padding:12px}}
+
+/* Taste Test results: consistent type scale and scannable sections. */
+#taste-modal #taste-result{font:15px/1.6 Arial,sans-serif;color:#dceafa}
+#taste-modal .taste-results-layout{max-width:560px;margin:auto}
+#taste-modal #taste-result .ody-title{font:normal clamp(22px,4vw,27px)/1.25 Georgia,serif;margin:4px 0 12px;color:#f2f7ff}
+#taste-modal #taste-result p{font-size:14px;line-height:1.65;margin:8px 0 12px}
+#taste-modal .taste-section-heading{font:600 16px/1.4 Arial,sans-serif;color:#f1f7ff;margin:24px 0 12px}
+#taste-modal .taste-genre-list{display:grid;gap:12px}
+#taste-modal .taste-genre-label{display:flex;justify-content:space-between;gap:12px;font-size:14px;margin-bottom:5px}
+#taste-modal .taste-genre-label span:last-child{color:#aac5df;font-size:12px;white-space:nowrap}
+#taste-modal .taste-genre-track{height:6px;background:#19314b;border-radius:10px;overflow:hidden}
+#taste-modal .taste-genre-fill{height:100%;background:#7cbfff;border-radius:10px}
+#taste-modal .taste-film-list{display:grid;gap:10px}
+#taste-modal .taste-film{display:grid;grid-template-columns:25px minmax(0,1fr);gap:11px;align-items:start;padding:13px;border:1px solid #29496d;border-radius:11px;background:#071426}
+#taste-modal .taste-film-number{font:600 13px Arial,sans-serif;color:#9dc8ef;padding-top:2px}
+#taste-modal .taste-film-body strong{display:block;font:600 15px/1.45 Arial,sans-serif;color:#f2f7ff}
+#taste-modal .taste-film-year{font-weight:400;color:#afc5dc}
+#taste-modal .taste-film-body .meta{font:12px/1.5 Arial,sans-serif;color:#9fbdd8;margin:4px 0}
+#taste-modal #taste-result .taste-film-body p{font:13px/1.55 Arial,sans-serif;color:#c4d5e8;margin:5px 0 0}
+#taste-modal #taste-result .taste-disclaimer{font:12px/1.6 Arial,sans-serif;color:#9eb9d3;margin-top:17px}
+@media(max-width:520px){#taste-modal .taste-film{padding:11px;gap:8px}#taste-modal .taste-film-body strong{font-size:14px}}
+</style>
+</head>
 <body>
 <div id="stars"></div><div id="stars2"></div><div class="shooting-star"></div>
 <header class="topbar"><nav class="nav"><button onclick="goHome()">Home</button><button onclick="goDiscover()">Discover</button><button onclick="showSaved()">My List</button><button onclick="showCinematicDNA()">Cinematic DNA ✦</button><button onclick="openProfile()">My Profile</button></nav><input class="search" id="search" placeholder="Search movies or genres…" aria-label="Search movies" oninput="renderMovies()"></header>
@@ -803,7 +835,7 @@ function showQuiz(){
    box.appendChild(progress);
    const chapterLabel=document.createElement('p');chapterLabel.className='ody-caption';chapterLabel.textContent=`CHAPTER ${chapter+1} · ${TASTE_CHAPTERS[chapter]}`;box.appendChild(chapterLabel);
   }
-  const prompt=document.createElement('p');prompt.className='muted';prompt.textContent=q.questions[quizIndex][0];box.appendChild(prompt);
+  const prompt=document.createElement('p');prompt.className=isTaste?'muted taste-question':'muted';prompt.textContent=q.questions[quizIndex][0];box.appendChild(prompt);
   q.questions[quizIndex][1].forEach(a=>{
    const b=document.createElement('button');b.className='choice';b.textContent=a;
    b.onclick=()=>{quizAnswers[quizIndex]=a;quizIndex++;showQuiz()};box.appendChild(b);
@@ -818,7 +850,7 @@ function showQuiz(){
   }else{
    const profile=tasteProfile(quizAnswers);
    const top=profile.ranked.slice(0,4),best=profile.styleOrder.slice(0,2).map(x=>x.name.toLowerCase());
-   res.innerHTML=`<p class="ody-caption">YOUR CINEMATIC UNIVERSE</p><h3 class="ody-title">${escapeHtml(profile.styleOrder[0].name)} Explorer ✦</h3><p>Your answers suggest you are drawn to <strong>${escapeHtml(best.join(' and '))}</strong>. This is a starting point, not a fixed personality label.</p><p><strong>Your strongest genre signals</strong></p>${top.map(([g,n])=>`<div style="margin:9px 0"><div style="display:flex;justify-content:space-between"><span>${escapeHtml(g)}</span><span>${n} points</span></div><div style="height:7px;background:#19314b;border-radius:10px"><div style="height:100%;width:${Math.round(n/(top[0]?.[1]||1)*100)}%;background:#7cbfff;border-radius:10px"></div></div></div>`).join('')}<p style="margin-top:18px"><strong>Five films for your universe</strong></p><div class="mood-recommendations">${profile.picks.map(({movie:m},i)=>`<div class="mood-pick"><strong>${i+1}. ${escapeHtml(m.title)} (${m.year||'—'})</strong><div class="meta">${escapeHtml(m.genres.join(' · '))}</div><p>${escapeHtml(m.desc||'')}</p></div>`).join('')}</div><p class="dna-hint">Recommendations are based on your answer-to-genre matches among movies currently loaded on this page. Load more movies for a wider selection. Results are calculated locally in this browser.</p>`;
+   res.innerHTML=`<div class="taste-results-layout"><p class="ody-caption">YOUR CINEMATIC UNIVERSE</p><h3 class="ody-title">${escapeHtml(profile.styleOrder[0].name)} Explorer ✦</h3><p>Your answers suggest you are drawn to <strong>${escapeHtml(best.join(' and '))}</strong>. This is a starting point, not a fixed personality label.</p><h4 class="taste-section-heading">Your strongest genre signals</h4><div class="taste-genre-list">${top.map(([g,n])=>`<div class="taste-genre-row"><div class="taste-genre-label"><span>${escapeHtml(g)}</span><span>${n} points</span></div><div class="taste-genre-track"><div class="taste-genre-fill" style="width:${Math.round(n/(top[0]?.[1]||1)*100)}%"></div></div></div>`).join('')}</div><h4 class="taste-section-heading">Five films for your universe</h4><div class="taste-film-list">${profile.picks.map(({movie:m},i)=>`<div class="taste-film"><div class="taste-film-number">${i+1}</div><div class="taste-film-body"><strong>${escapeHtml(m.title)} <span class="taste-film-year">(${m.year||'—'})</span></strong><div class="meta">${escapeHtml(m.genres.join(' · '))}</div><p>${escapeHtml(m.desc||'')}</p></div></div>`).join('')}</div><p class="dna-hint taste-disclaimer">Recommendations are based on genre matches among movies currently loaded on this page. Load more movies for wider selection. Results are calculated locally in your browser.</p></div>`;
    const explore=document.createElement('button');explore.className='primary';explore.textContent='Explore my five films ✦';explore.onclick=()=>{document.getElementById('search').value='';document.getElementById('filters').reset();closeModals();renderMovies(profile.picks.map(x=>x.movie));document.getElementById('discover').scrollIntoView({behavior:'smooth'})};box.appendChild(explore);
   }
   res.classList.add('show');const again=document.createElement('button');again.className='choice';again.textContent='Take the test again';again.onclick=()=>startQuiz(quizType);box.appendChild(again);
