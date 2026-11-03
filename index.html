@@ -272,6 +272,8 @@
 #taste-modal .taste-film{display:grid;grid-template-columns:25px minmax(0,1fr);gap:11px;align-items:start;padding:13px;border:1px solid #29496d;border-radius:11px;background:#071426}
 #taste-modal .taste-film-number{font:600 13px Arial,sans-serif;color:#9dc8ef;padding-top:2px}
 #taste-modal .taste-film-body strong{display:block;font:600 15px/1.45 Arial,sans-serif;color:#f2f7ff}
+#taste-modal .taste-film-open{display:block;text-align:left;border:0;background:none;padding:0;color:#f2f7ff;font:600 15px/1.45 Arial,sans-serif;cursor:pointer}
+#taste-modal .taste-film-open:hover,#taste-modal .taste-film-open:focus-visible{color:#8fc9ff;text-decoration:underline}
 #taste-modal .taste-film-year{font-weight:400;color:#afc5dc}
 #taste-modal .taste-film-body .meta{font:12px/1.5 Arial,sans-serif;color:#9fbdd8;margin:4px 0}
 #taste-modal #taste-result .taste-film-body p{font:13px/1.55 Arial,sans-serif;color:#c4d5e8;margin:5px 0 0}
@@ -515,18 +517,74 @@ let movies=[
 {title:'The Grand Budapest Hotel',year:2014,rating:8.1,genres:['Comedy','Adventure'],moods:['Comforting','Dreamlike'],theme:'Identity',pace:'Balanced',desc:'A whimsical caper in a fading European hotel.',img:'https://image.tmdb.org/t/p/w500/eWdyYQreja6JGCzqHWXpWHDrrPo.jpg'},
 {title:'Arrival',year:2016,rating:7.9,genres:['Sci-Fi','Drama'],moods:['Thought-provoking','Emotional'],theme:'Hope',pace:'Slow and atmospheric',desc:'A linguist tries to communicate with visitors from beyond Earth.',img:'https://image.tmdb.org/t/p/w500/x2FJsf1ElAgr63Y3PNPtJrcmpoe.jpg'}];
 
+/* Taste Test film navigation: keep quiz results mounted when opening a film. */
+let tasteCurrentPicks=[];
+function openTasteFilm(index){
+ const movie=tasteCurrentPicks[index];
+ if(!movie)return;
+ openFilmPage(movie);
+ const target=document.getElementById('film-page-content');
+ const back=document.createElement('button');
+ back.type='button';back.className='back';back.textContent='← Back to my Taste Test results';
+ back.onclick=()=>{document.getElementById('film-page-modal').classList.remove('active');document.getElementById('taste-modal').classList.add('active')};
+ target.prepend(back);
+}
+/* Film Universe extras: credits from supported Worker responses, without exposing a TMDB token. */
+const filmCreditsCache=new Map();
+async function loadFilmCredits(movie){
+ const host=document.getElementById('film-credits-content');
+ if(!host)return;
+ if(!movie.tmdbId){host.textContent='Cast and director details are not available for this locally curated film yet.';return;}
+ const id=Number(movie.tmdbId);
+ if(!Number.isSafeInteger(id)||id<=0)return;
+ if(filmCreditsCache.has(id)){renderFilmCredits(filmCreditsCache.get(id),host);return;}
+ try{
+  // Worker support varies: only accept responses containing actual credits.
+  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),6500);
+  let payload=null;
+  try{
+   for(const url of [TMDB_WORKER+'?movie_id='+id+'&append_to_response=credits',TMDB_WORKER+'?id='+id+'&append_to_response=credits']){
+    const response=await fetch(url,{signal:controller.signal});
+    if(!response.ok)continue;
+    const data=await response.json();
+    if(data&&((data.credits&&Array.isArray(data.credits.cast))||Array.isArray(data.cast))){payload=data;break;}
+   }
+  }finally{clearTimeout(timeout)}
+  if(document.getElementById('film-credits-content')!==host)return;
+  if(payload){filmCreditsCache.set(id,payload);renderFilmCredits(payload,host)}
+  else host.textContent='Cast and director details are not available through the current movie service yet.';
+ }catch(e){if(document.getElementById('film-credits-content')===host)host.textContent='Could not load credits right now.';}
+}
+function renderFilmCredits(data,host){
+ const credits=data.credits||data;
+ const crew=Array.isArray(credits.crew)?credits.crew:[];
+ const cast=Array.isArray(credits.cast)?credits.cast:[];
+ const directors=crew.filter(p=>p.job==='Director').map(p=>p.name).filter(Boolean);
+ host.replaceChildren();
+ const director=document.createElement('p');director.textContent='Director: '+(directors.join(', ')||'Not available');host.append(director);
+ const heading=document.createElement('p');heading.textContent='Cast';heading.style.fontWeight='bold';host.append(heading);
+ if(!cast.length){const empty=document.createElement('p');empty.textContent='Cast information not available.';host.append(empty);return;}
+ const list=document.createElement('div');list.className='film-credits-cast';
+ cast.slice(0,10).forEach(person=>{const item=document.createElement('div');item.className='film-credits-person';
+ if(typeof person.profile_path==='string'&&/^\/[a-zA-Z0-9]+$/.test(person.profile_path)){const img=document.createElement('img');img.src='https://image.tmdb.org/t/p/w185'+person.profile_path;img.alt='';img.loading='lazy';item.append(img)}
+ const text=document.createElement('span');text.textContent=(person.name||'Unknown')+(person.character?' · '+person.character:'');item.append(text);list.append(item)});
+ host.append(list);
+}
+<style>
+.film-extra-section{margin-top:22px;padding-top:16px;border-top:1px solid #29496d}.film-extra-section h3{font-size:16px;margin:0 0 12px}.film-credits-cast{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}.film-credits-person{display:flex;align-items:center;gap:9px;font-size:13px}.film-credits-person img{width:42px;height:60px;object-fit:cover;border-radius:6px}
+</style>
 /* Film Universe: dedicated in-app film detail view for loaded TMDB movies. */
 let filmPageCurrent=null;
 function openFilmPage(m){
  filmPageCurrent=m;
  const target=document.getElementById('film-page-content');
  const image=m.img&&m.img.startsWith('https://image.tmdb.org/')?`<img class="film-page-poster" src="${m.img}" alt="${escapeHtml(m.title)} poster">`:'<div class="film-page-poster" style="display:grid;place-items:center;font-size:40px">✦</div>';
- target.innerHTML=`<div class="film-page-layout"><div>${image}</div><div><p class="muted" style="letter-spacing:.15em">✦ FILM UNIVERSE</p><h2 class="film-page-title">${escapeHtml(m.title)}</h2><p class="film-page-meta">${m.year||'Year unknown'} · ${m.genres.map(escapeHtml).join(' · ')||'Genre unknown'} · ★ ${Number(m.rating||0).toFixed(1)} TMDB</p><p class="film-page-desc">${escapeHtml(m.desc||'No synopsis available.')}</p><div class="film-page-actions"><button type="button" id="film-love">♡ Love it</button><button type="button" id="film-orbit">☾ Watch Later</button><button type="button" id="film-dna">✦ Rate & Review</button></div><p class="muted" style="margin-top:20px;font-size:12px">Your personal ratings and reviews are saved in this browser. Trailer and cast details can be added when our Worker supports movie-detail requests.</p></div></div>`;
+ target.innerHTML=`<div class="film-page-layout"><div>${image}</div><div><p class="muted" style="letter-spacing:.15em">✦ FILM UNIVERSE</p><h2 class="film-page-title">${escapeHtml(m.title)}</h2><p class="film-page-meta">${m.year||'Year unknown'} · ${m.genres.map(escapeHtml).join(' · ')||'Genre unknown'} · ★ ${Number(m.rating||0).toFixed(1)} TMDB</p><p class="film-page-desc">${escapeHtml(m.desc||'No synopsis available.')}</p><div class="film-page-actions"><button type="button" id="film-love">♡ Love it</button><button type="button" id="film-orbit">☾ Watch Later</button><button type="button" id="film-dna">✦ Rate & Review</button></div><section class="film-extra-section"><h3>Cast &amp; director</h3><div id="film-credits-content" aria-live="polite">Loading film credits…</div></section><section class="film-extra-section"><h3>Recommended by the community</h3><p class="muted">Community recommendations will appear here once Filmlerrs supports public movie recommendations. We won't display made-up members or endorsements.</p></section><p class="muted" style="margin-top:20px;font-size:12px">Your personal ratings and reviews are saved in this browser.</p></div></div>`;
  function update(){const d=dnaData[dnaKey(m)]||{};document.getElementById('film-love').textContent=d.constellation?'♥ Loved':'♡ Love it';document.getElementById('film-love').style.color=d.constellation?'#ff657d':'';document.getElementById('film-orbit').textContent=d.orbit?'☾ In Your Orbit':'☾ Watch Later'}
  document.getElementById('film-love').onclick=()=>{quickDna(m,'constellation');update()};
  document.getElementById('film-orbit').onclick=()=>{quickDna(m,'orbit');update()};
  document.getElementById('film-dna').onclick=()=>openDnaMovie(m);
- update();openModal('film-page-modal');
+ update();openModal('film-page-modal');loadFilmCredits(m);
 }
 
 function renderMovies(list=movies){
@@ -913,8 +971,9 @@ function showQuiz(){
    const explore=document.createElement('button');explore.className='primary';explore.textContent='Show these recommendations';explore.onclick=()=>{document.getElementById('search').value='';document.getElementById('filters').reset();closeModals();renderMovies(picks);document.getElementById('discover').scrollIntoView({behavior:'smooth'})};box.appendChild(explore);
   }else{
    const profile=tasteProfile(quizAnswers);
+   tasteCurrentPicks=profile.picks.map(x=>x.movie);
    const top=profile.ranked.slice(0,4),best=profile.styleOrder.slice(0,2).map(x=>x.name.toLowerCase());
-   res.innerHTML=`<div class="taste-results-layout"><p class="ody-caption">YOUR CINEMATIC UNIVERSE</p><h3 class="ody-title">${escapeHtml(profile.styleOrder[0].name)} Explorer ✦</h3><p>Your answers suggest you are drawn to <strong>${escapeHtml(best.join(' and '))}</strong>. This is a starting point, not a fixed personality label.</p><h4 class="taste-section-heading">Your strongest genre signals</h4><div class="taste-genre-list">${top.map(([g,n])=>`<div class="taste-genre-row"><div class="taste-genre-label"><span>${escapeHtml(g)}</span><span>${n} points</span></div><div class="taste-genre-track"><div class="taste-genre-fill" style="width:${Math.round(n/(top[0]?.[1]||1)*100)}%"></div></div></div>`).join('')}</div><h4 class="taste-section-heading">Five films for your universe</h4><div class="taste-film-list">${profile.picks.map(({movie:m},i)=>`<div class="taste-film"><div class="taste-film-number">${i+1}</div><div class="taste-film-body"><strong>${escapeHtml(m.title)} <span class="taste-film-year">(${m.year||'—'})</span></strong><div class="meta">${escapeHtml(m.genres.join(' · '))}</div><p>${escapeHtml(m.desc||'')}</p><p class="taste-match-reason">${escapeHtml(profile.picks[i].reason)}</p><div class="taste-feedback"><button type="button" onclick="setTasteFeedback('${tasteMovieKey(m)}','liked')">♡ Interested</button><button type="button" onclick="setTasteFeedback('${tasteMovieKey(m)}','seen')">✓ Already seen</button><button type="button" onclick="setTasteFeedback('${tasteMovieKey(m)}','disliked')">✕ Not for me</button></div></div></div>`).join('')}</div><p class="dna-hint taste-disclaimer">Recommendations combine your genre answers, story preferences and variety across decades. Feedback is saved in this browser. Load more TMDB movies to widen the selection.</p></div>`;
+   res.innerHTML=`<div class="taste-results-layout"><p class="ody-caption">YOUR CINEMATIC UNIVERSE</p><h3 class="ody-title">${escapeHtml(profile.styleOrder[0].name)} Explorer ✦</h3><p>Your answers suggest you are drawn to <strong>${escapeHtml(best.join(' and '))}</strong>. This is a starting point, not a fixed personality label.</p><h4 class="taste-section-heading">Your strongest genre signals</h4><div class="taste-genre-list">${top.map(([g,n])=>`<div class="taste-genre-row"><div class="taste-genre-label"><span>${escapeHtml(g)}</span><span>${n} points</span></div><div class="taste-genre-track"><div class="taste-genre-fill" style="width:${Math.round(n/(top[0]?.[1]||1)*100)}%"></div></div></div>`).join('')}</div><h4 class="taste-section-heading">Five films for your universe</h4><div class="taste-film-list">${profile.picks.map(({movie:m},i)=>`<div class="taste-film"><div class="taste-film-number">${i+1}</div><div class="taste-film-body"><button type="button" class="taste-film-open" onclick="openTasteFilm(${i})" aria-label="View details for ${escapeHtml(m.title)}">${escapeHtml(m.title)} <span class="taste-film-year">(${m.year||'—'})</span> <span aria-hidden="true">↗</span></button><div class="meta">${escapeHtml(m.genres.join(' · '))}</div><p>${escapeHtml(m.desc||'')}</p><p class="taste-match-reason">${escapeHtml(profile.picks[i].reason)}</p><div class="taste-feedback"><button type="button" onclick="setTasteFeedback('${tasteMovieKey(m)}','liked')">♡ Interested</button><button type="button" onclick="setTasteFeedback('${tasteMovieKey(m)}','seen')">✓ Already seen</button><button type="button" onclick="setTasteFeedback('${tasteMovieKey(m)}','disliked')">✕ Not for me</button></div></div></div>`).join('')}</div><p class="dna-hint taste-disclaimer">Recommendations combine your genre answers, story preferences and variety across decades. Feedback is saved in this browser. Load more TMDB movies to widen the selection.</p></div>`;
    const explore=document.createElement('button');explore.className='primary';explore.textContent='Explore my five films ✦';explore.onclick=()=>{document.getElementById('search').value='';document.getElementById('filters').reset();closeModals();renderMovies(profile.picks.map(x=>x.movie));document.getElementById('discover').scrollIntoView({behavior:'smooth'})};box.appendChild(explore);
   }
   res.classList.add('show');const again=document.createElement('button');again.className='choice';again.textContent='Take the test again';again.onclick=()=>startQuiz(quizType);box.appendChild(again);
