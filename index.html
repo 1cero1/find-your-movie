@@ -511,14 +511,14 @@ document.getElementById(&#x27;discover&#x27;).addEventListener(&#x27;click&#x27;
 </div><button class="primary" type="submit">Find matching movies</button><button class="secondary" type="button" onclick="document.getElementById('filters').reset();renderMovies()">Clear filters</button></form><div id="filter-result" class="result"></div><button class="back" onclick="closeModals()">← Back to Home</button></div></div>
 <script>
 let movies=[
-{title:'Interstellar',year:2014,rating:8.7,genres:['Sci-Fi','Drama','Adventure'],moods:['Thought-provoking','Emotional'],theme:'Survival',pace:'Balanced',desc:'A journey beyond the stars to protect humanity.',img:'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg'},
-{title:'La La Land',year:2016,rating:8.0,genres:['Romance','Drama','Comedy'],moods:['Romantic','Emotional'],theme:'Love',pace:'Balanced',desc:'Two dreamers chase love and ambition in Los Angeles.',img:'https://image.tmdb.org/t/p/w500/uDO8zWDhfWwoFdKS4fzkUJt0Rf0.jpg'},
-{title:'The Dark Knight',year:2008,rating:9.0,genres:['Action','Drama','Thriller'],moods:['Dark','Exciting'],theme:'Morality',pace:'Fast-paced',desc:'A city is pushed to its limits by a chaotic enemy.',img:'https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg'},
-{title:'Inception',year:2010,rating:8.8,genres:['Sci-Fi','Action','Thriller'],moods:['Thought-provoking','Exciting','Dreamlike'],theme:'Identity',pace:'Fast-paced',desc:'A team enters dreams to plant an idea.',img:'https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg'},
-{title:'Spirited Away',year:2001,rating:8.6,genres:['Animation','Fantasy','Adventure'],moods:['Dreamlike','Emotional'],theme:'Self-discovery',pace:'Balanced',desc:'A young girl finds courage in a mysterious spirit world.',img:'https://image.tmdb.org/t/p/w500/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg'},
-{title:'The Shawshank Redemption',year:1994,rating:9.3,genres:['Drama'],moods:['Hope','Emotional'],theme:'Hope',pace:'Slow and atmospheric',desc:'Friendship and hope endure inside prison walls.',img:'https://image.tmdb.org/t/p/w500/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg'},
-{title:'The Grand Budapest Hotel',year:2014,rating:8.1,genres:['Comedy','Adventure'],moods:['Comforting','Dreamlike'],theme:'Identity',pace:'Balanced',desc:'A whimsical caper in a fading European hotel.',img:'https://image.tmdb.org/t/p/w500/eWdyYQreja6JGCzqHWXpWHDrrPo.jpg'},
-{title:'Arrival',year:2016,rating:7.9,genres:['Sci-Fi','Drama'],moods:['Thought-provoking','Emotional'],theme:'Hope',pace:'Slow and atmospheric',desc:'A linguist tries to communicate with visitors from beyond Earth.',img:'https://image.tmdb.org/t/p/w500/x2FJsf1ElAgr63Y3PNPtJrcmpoe.jpg'}];
+{title:'Interstellar',tmdbId:157336,year:2014,rating:8.7,genres:['Sci-Fi','Drama','Adventure'],moods:['Thought-provoking','Emotional'],theme:'Survival',pace:'Balanced',desc:'A journey beyond the stars to protect humanity.',img:'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg'},
+{title:'La La Land',tmdbId:313369,year:2016,rating:8.0,genres:['Romance','Drama','Comedy'],moods:['Romantic','Emotional'],theme:'Love',pace:'Balanced',desc:'Two dreamers chase love and ambition in Los Angeles.',img:'https://image.tmdb.org/t/p/w500/uDO8zWDhfWwoFdKS4fzkUJt0Rf0.jpg'},
+{title:'The Dark Knight',tmdbId:155,year:2008,rating:9.0,genres:['Action','Drama','Thriller'],moods:['Dark','Exciting'],theme:'Morality',pace:'Fast-paced',desc:'A city is pushed to its limits by a chaotic enemy.',img:'https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg'},
+{title:'Inception',tmdbId:27205,year:2010,rating:8.8,genres:['Sci-Fi','Action','Thriller'],moods:['Thought-provoking','Exciting','Dreamlike'],theme:'Identity',pace:'Fast-paced',desc:'A team enters dreams to plant an idea.',img:'https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg'},
+{title:'Spirited Away',tmdbId:129,year:2001,rating:8.6,genres:['Animation','Fantasy','Adventure'],moods:['Dreamlike','Emotional'],theme:'Self-discovery',pace:'Balanced',desc:'A young girl finds courage in a mysterious spirit world.',img:'https://image.tmdb.org/t/p/w500/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg'},
+{title:'The Shawshank Redemption',tmdbId:278,year:1994,rating:9.3,genres:['Drama'],moods:['Hope','Emotional'],theme:'Hope',pace:'Slow and atmospheric',desc:'Friendship and hope endure inside prison walls.',img:'https://image.tmdb.org/t/p/w500/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg'},
+{title:'The Grand Budapest Hotel',tmdbId:120467,year:2014,rating:8.1,genres:['Comedy','Adventure'],moods:['Comforting','Dreamlike'],theme:'Identity',pace:'Balanced',desc:'A whimsical caper in a fading European hotel.',img:'https://image.tmdb.org/t/p/w500/eWdyYQreja6JGCzqHWXpWHDrrPo.jpg'},
+{title:'Arrival',tmdbId:329865,year:2016,rating:7.9,genres:['Sci-Fi','Drama'],moods:['Thought-provoking','Emotional'],theme:'Hope',pace:'Slow and atmospheric',desc:'A linguist tries to communicate with visitors from beyond Earth.',img:'https://image.tmdb.org/t/p/w500/x2FJsf1ElAgr63Y3PNPtJrcmpoe.jpg'}];
 
 /* Taste Test film navigation: keep quiz results mounted when opening a film. */
 let tasteCurrentPicks=[];
@@ -538,7 +538,7 @@ async function loadFilmCredits(movie){
  const host=document.getElementById('film-credits-content');
  if(!host)return;
  const id=Number(movie.tmdbId);
- if(!Number.isSafeInteger(id)||id<=0){host.textContent='Detailed credits are available for films loaded from TMDB. Try searching for this film in the movie catalog.';return;}
+ if(!Number.isSafeInteger(id)||id<=0){host.textContent='Credits unavailable for this film because it has no verified TMDB ID.';const facts=document.getElementById('film-production-content');if(facts)facts.textContent='No verified production details available.';return;}
  if(filmCreditsCache.has(id)){renderFilmCredits(filmCreditsCache.get(id),host);return;}
  const controller=new AbortController();
  const timeout=setTimeout(()=>controller.abort(),9000);
@@ -550,7 +550,7 @@ async function loadFilmCredits(movie){
   filmCreditsCache.set(id,payload);
   if(host.isConnected&&document.getElementById('film-credits-content')===host)renderFilmCredits(payload,host);
  }catch(error){
-  if(host.isConnected&&document.getElementById('film-credits-content')===host){host.textContent=controller.signal.aborted?'Movie details took too long to load. Please try opening this film again.':'Could not load film credits right now.';}
+  if(host.isConnected&&document.getElementById('film-credits-content')===host){host.textContent=controller.signal.aborted?'Movie details took too long to load. Please try opening this film again.':'Could not load film credits right now.';const facts=document.getElementById('film-production-content');if(facts)facts.textContent='Production details could not be loaded.';}
   console.warn('Film details:',error.message);
  }finally{clearTimeout(timeout);}
 }
@@ -560,6 +560,16 @@ function renderFilmCredits(data,host){
  const cast=Array.isArray(credits.cast)?credits.cast:[];
  const directors=crew.filter(p=>p.job==='Director').map(p=>p.name).filter(Boolean);
  host.replaceChildren();
+ const story=document.getElementById('film-story-text');
+ if(story&&typeof data.overview==='string'&&data.overview.trim())story.textContent=data.overview;
+ const facts=document.getElementById('film-production-content');
+ if(facts){
+  facts.replaceChildren();
+  const writers=crew.filter(p=>['Writer','Screenplay','Story'].includes(p.job)).map(p=>p.name).filter(Boolean);
+  const entries=[['Original title',data.original_title],['Original language',data.original_language?.toUpperCase()],['Production countries',(data.production_countries||[]).map(c=>c.name).join(', ')],['Production companies',(data.production_companies||[]).map(c=>c.name).join(', ')],['Writers',[...new Set(writers)].join(', ')],['Tagline',data.tagline]];
+  entries.filter(([,v])=>v).forEach(([label,value])=>{const line=document.createElement('p');const strong=document.createElement('strong');strong.textContent=label+': ';line.append(strong,document.createTextNode(value));facts.append(line)});
+  if(!facts.childNodes.length)facts.textContent='Additional production information is not available.';
+ }
  const details=document.createElement('p');
  const parts=[];
  if(Number(data.runtime)>0)parts.push(Number(data.runtime)+' min');
@@ -572,7 +582,7 @@ function renderFilmCredits(data,host){
   const list=document.createElement('div');list.className='film-credits-cast';
   cast.slice(0,10).forEach(person=>{
    const item=document.createElement('div');item.className='film-credits-person';
-   if(typeof person.profile_path==='string'&&/^\/[a-zA-Z0-9]+$/.test(person.profile_path)){
+   if(typeof person.profile_path==='string'&&/^\/[a-zA-Z0-9_\/-]+\.(?:jpg|jpeg|png|webp)$/i.test(person.profile_path)){
     const img=document.createElement('img');img.src='https://image.tmdb.org/t/p/w185'+person.profile_path;img.alt='';img.loading='lazy';item.append(img);
    }
    const name=document.createElement('span');name.textContent=(person.name||'Unknown')+(person.character?' · '+person.character:'');item.append(name);list.append(item);
@@ -590,7 +600,7 @@ function openFilmPage(m){
  filmPageCurrent=m;
  const target=document.getElementById('film-page-content');
  const image=m.img&&m.img.startsWith('https://image.tmdb.org/')?`<img class="film-page-poster" src="${m.img}" alt="${escapeHtml(m.title)} poster">`:'<div class="film-page-poster" style="display:grid;place-items:center;font-size:40px">✦</div>';
- target.innerHTML=`<div class="film-page-layout"><div>${image}</div><div><p class="muted" style="letter-spacing:.15em">✦ FILM UNIVERSE</p><h2 class="film-page-title">${escapeHtml(m.title)}</h2><p class="film-page-meta">${m.year||'Year unknown'} · ${m.genres.map(escapeHtml).join(' · ')||'Genre unknown'} · ★ ${Number(m.rating||0).toFixed(1)} TMDB</p><p class="film-page-desc">${escapeHtml(m.desc||'No synopsis available.')}</p><div class="film-page-actions"><button type="button" id="film-love">♡ Love it</button><button type="button" id="film-orbit">☾ Watch Later</button><button type="button" id="film-dna">✦ Rate & Review</button></div><section class="film-extra-section"><h3>Cast &amp; director</h3><div id="film-credits-content" aria-live="polite">Loading film credits…</div></section><section class="film-extra-section"><h3>Recommended by the community</h3><p class="muted">Community recommendations will appear here once Filmlerrs supports public movie recommendations. We won't display made-up members or endorsements.</p></section><p class="muted" style="margin-top:20px;font-size:12px">Your personal ratings and reviews are saved in this browser.</p></div></div>`;
+ target.innerHTML=`<div class="film-page-layout"><div>${image}</div><div><p class="muted" style="letter-spacing:.15em">✦ FILM UNIVERSE</p><h2 class="film-page-title">${escapeHtml(m.title)}</h2><p class="film-page-meta">${m.year||'Year unknown'} · ${m.genres.map(escapeHtml).join(' · ')||'Genre unknown'} · ★ ${Number(m.rating||0).toFixed(1)} TMDB</p><section class="film-extra-section"><h3>The story</h3><p id="film-story-text" class="film-page-desc">${escapeHtml(m.desc||'No synopsis available.')}</p></section><div class="film-page-actions"><button type="button" id="film-love">♡ Love it</button><button type="button" id="film-orbit">☾ Watch Later</button><button type="button" id="film-dna">✦ Rate & Review</button></div><section class="film-extra-section"><h3>Cast &amp; director</h3><div id="film-credits-content" aria-live="polite">Loading film credits…</div></section><section class="film-extra-section"><h3>Behind the film</h3><div id="film-production-content" class="muted">Loading production information…</div></section><section class="film-extra-section"><h3>Recommended by the community</h3><p class="muted">Community recommendations will appear here once Filmlerrs supports public movie recommendations. We won't display made-up members or endorsements.</p></section><p class="muted" style="margin-top:20px;font-size:12px">Your personal ratings and reviews are saved in this browser.</p></div></div>`;
  function update(){const d=dnaData[dnaKey(m)]||{};document.getElementById('film-love').textContent=d.constellation?'♥ Loved':'♡ Love it';document.getElementById('film-love').style.color=d.constellation?'#ff657d':'';document.getElementById('film-orbit').textContent=d.orbit?'☾ In Your Orbit':'☾ Watch Later'}
  document.getElementById('film-love').onclick=()=>{quickDna(m,'constellation');update()};
  document.getElementById('film-orbit').onclick=()=>{quickDna(m,'orbit');update()};
