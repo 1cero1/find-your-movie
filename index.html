@@ -304,7 +304,7 @@
 <button class="feature odyssey" onclick="openOdyssey()"><span class="glyph">✦</span><strong>Beyond the Frame</strong><small>Ten films. A new perspective.</small></button>
 </section>
 <section class="content-section" id="dna-section" style="display:none"><div class="section-heading"><h2>✦ Your Cinematic DNA</h2><span class="rule"></span><button onclick="closeCinematicDNA()">Back to discovery ↗</button></div><p class="muted">Your orbit, constellation, and the stories that stayed with you.</p><div id="dna-dashboard"></div></section>
-<section class="content-section" id="discover"><div class="section-heading"><h2>Under the Stars</h2><span class="rule"></span><button onclick="document.getElementById('search').focus()">Search films ↗</button></div><p class="muted" id="catalog-status" role="status">Loading movies from TMDB…</p><div class="movie-grid" id="movie-grid"></div><button class="primary" id="load-more" type="button" onclick="loadMoreMovies()" style="max-width:300px;margin:24px auto;display:none">Load more movies ✦</button></section>
+<section class="content-section" id="discover"><div class="section-heading"><h2>Under the Stars</h2><span class="rule"></span><button onclick="document.getElementById('search').focus()">Search films ↗</button></div><p class="muted" id="catalog-status" role="status">8 starter films available · Connecting to TMDB…</p><div class="movie-grid" id="movie-grid"></div><button class="primary" id="load-more" type="button" onclick="loadMoreMovies()" style="max-width:300px;margin:24px auto;display:none">Load more movies ✦</button></section>
 </main><footer>Made for movie nights under an endless sky · Movie data and images provided by TMDB · This product uses the TMDB API but is not endorsed or certified by TMDB</footer>
 
 <div class="overlay" id="odyssey-modal"><div class="modal odyssey-modal" role="dialog" aria-modal="true" aria-labelledby="odyssey-heading"><h2 id="odyssey-heading">✦ Beyond the Frame</h2><div id="odyssey-content"></div><button class="back" type="button" onclick="closeModals()">← Back to Home</button></div></div>
@@ -797,20 +797,42 @@ const TMDB_WORKER='https://find-your-movie-api.cerennelif18.workers.dev/';
 const TMDB_GENRES={28:'Action',12:'Adventure',16:'Animation',35:'Comedy',80:'Crime',99:'Documentary',18:'Drama',10751:'Family',14:'Fantasy',36:'History',27:'Horror',10402:'Music',9648:'Mystery',10749:'Romance',878:'Sci-Fi',10770:'TV Movie',53:'Thriller',10752:'War',37:'Western'};
 let nextMoviePage=1,loadingMovies=false,allPagesLoaded=false;
 function normalizeTMDBMovie(m){return {title:m.title||m.original_title||'Untitled',year:Number((m.release_date||'').slice(0,4))||0,rating:Number(m.vote_average)||0,genres:(m.genre_ids||[]).map(id=>TMDB_GENRES[id]).filter(Boolean),moods:[],theme:'',pace:'',desc:m.overview||'No description available.',img:m.poster_path?'https://image.tmdb.org/t/p/w500'+m.poster_path:'',tmdbId:m.id,voteCount:Number(m.vote_count)||0,popularity:Number(m.popularity)||0}}
-async function loadMoreMovies(){if(loadingMovies||allPagesLoaded)return;loadingMovies=true;
- const btn=document.getElementById('load-more'),status=document.getElementById('catalog-status');btn.disabled=true;btn.textContent='Loading movies…';
+async function loadMoreMovies(){
+ if(loadingMovies||allPagesLoaded)return;
+ loadingMovies=true;
+ const btn=document.getElementById('load-more'),status=document.getElementById('catalog-status');
+ if(btn){btn.disabled=true;btn.textContent='Loading movies…';}
+ if(status)status.textContent=`${movies.length} starter films available · Checking TMDB…`;
  let added=0,failed=false;
- try{for(let i=0;i<5&&nextMoviePage<=50;i++){
- const response=await fetch(TMDB_WORKER+'?page='+nextMoviePage);
- if(!response.ok)throw new Error('TMDB returned '+response.status);
- const data=await response.json();if(!Array.isArray(data.results))throw new Error('Invalid movie data');
- const known=new Set(movies.map(m=>m.tmdbId||m.title));
- for(const item of data.results){if(!item.id||known.has(item.id))continue;movies.push(normalizeTMDBMovie(item));known.add(item.id);added++}
- nextMoviePage++;if(nextMoviePage>Math.min(50,data.total_pages||50)){allPagesLoaded=true;break}
- }}catch(e){failed=true;console.error('Movie loading failed:',e)}finally{
- loadingMovies=false;btn.disabled=false;btn.textContent='Load more movies ✦';btn.style.display=allPagesLoaded?'none':'block';
- status.textContent=failed?(added?`${movies.length} movies loaded. Connection interrupted; try Load more movies.`:'Could not load TMDB movies. Showing the original movies; try Load more movies.'):`${movies.length} movies available · Powered by TMDB`;
- if(added)renderMovies();}}
+ try{
+  // Limit each request so a stalled Worker cannot leave the page loading forever.
+  for(let i=0;i<3&&nextMoviePage<=50;i++){
+   const controller=new AbortController();
+   const timer=setTimeout(()=>controller.abort(),6500);
+   let response;
+   try{response=await fetch(TMDB_WORKER+'?page='+nextMoviePage,{signal:controller.signal});}
+   finally{clearTimeout(timer);}
+   if(!response.ok)throw new Error('Movie service returned '+response.status);
+   const data=await response.json();
+   if(!Array.isArray(data.results))throw new Error('Invalid movie data');
+   const known=new Set(movies.map(m=>m.tmdbId||m.title));
+   for(const item of data.results){
+    if(!item.id||known.has(item.id))continue;
+    movies.push(normalizeTMDBMovie(item));known.add(item.id);added++;
+   }
+   nextMoviePage++;
+   if(nextMoviePage>Math.min(50,data.total_pages||50)){allPagesLoaded=true;break;}
+  }
+ }catch(e){failed=true;console.warn('TMDB catalog unavailable; using loaded films:',e.message);}
+ finally{
+  loadingMovies=false;
+  if(btn){btn.disabled=false;btn.textContent=failed?'Retry TMDB connection ↻':'Load more movies ✦';btn.style.display=allPagesLoaded?'none':'block';}
+  if(status)status.textContent=failed
+   ?`${movies.length} films available · TMDB connection unavailable. You can browse these films or retry.`
+   :`${movies.length} films available · Powered by TMDB`;
+  try{renderMovies();}catch(e){console.error('Movie grid rendering failed:',e);if(status)status.textContent='Movie display error. Please report this issue.';}
+ }
+}
 loadMoreMovies();
 
 let saved=JSON.parse(localStorage.getItem('fym_saved_v1')||'[]');function toggleSaved(title,button){if(saved.includes(title)){saved=saved.filter(x=>x!==title);button.textContent='＋ Add to My List'}else{saved.push(title);button.textContent='✓ Added'}localStorage.setItem('fym_saved_v1',JSON.stringify(saved))}function showSaved(){fymShowLists()}
