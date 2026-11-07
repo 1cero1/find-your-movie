@@ -118,6 +118,35 @@
 .film-production-list p{margin:8px 0;color:#cbd1d9;line-height:1.65}
 .film-production-list strong{color:#f0e4d2;font-weight:500}
 @media(max-width:600px){.film-page-layout{grid-template-columns:1fr}.film-page-layout>div:first-child{max-width:160px}.film-page-title{font-size:2.5rem}}
+
+/* Film portrait refinements */
+.film-page-desc{font-family:inherit;font-size:.96rem;line-height:1.75;letter-spacing:0;color:#cbd3df;max-width:72ch}
+.film-extra-section{margin-top:27px;padding-top:20px}
+.film-extra-section h3{font-family:inherit;font-size:1.05rem;font-weight:600;letter-spacing:.015em;color:#e9dfd2;margin-bottom:14px}
+.film-credits-cast{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.film-credits-person,.film-director-person{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid #ffffff17;border-radius:9px;background:#ffffff06;color:#e8e5e0;text-align:left;cursor:pointer;width:100%;font-family:inherit}
+.film-credits-person:hover,.film-director-person:hover{background:#ffffff11;border-color:#c6a67e66}
+.film-credits-person img,.film-director-person img{width:52px;height:70px;object-fit:cover;border-radius:5px;flex:none}
+.film-person-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+.film-person-name{font-size:.91rem;font-weight:600;line-height:1.35}
+.film-person-role{font-size:.76rem;color:#a9b4c2;line-height:1.4}
+.film-person-group-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;color:#b9a183;margin:18px 0 10px}
+.film-production-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:10px 20px}
+.film-production-list p{margin:0;padding:10px 0;border-bottom:1px solid #ffffff12;font-size:.88rem;line-height:1.5}
+.film-production-list strong{display:block;font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:#b9a183;margin-bottom:4px}
+.film-release-list{margin-top:15px;display:grid;gap:6px;font-size:.84rem;color:#cbd3df}
+.film-release-list p{margin:0;padding:7px 0;border-bottom:1px solid #ffffff12}
+.film-people-panel{margin-top:20px;padding:17px;border:1px solid #ffffff24;border-radius:10px;background:#0e1d30}
+.film-people-panel h4{font-size:1rem;margin:0 0 6px;color:#e9dfd2}
+.film-people-panel p{font-size:.83rem;color:#aab8c8}
+.film-filmography{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:14px}
+.film-filmography button{border:1px solid #ffffff1b;background:#ffffff07;color:#eee;border-radius:8px;padding:8px;text-align:left;cursor:pointer;font-size:.8rem}
+.film-filmography img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover;margin-bottom:7px;border-radius:4px}
+.film-trailer-original{width:min(100%,660px);aspect-ratio:16/9;border:0;border-radius:6px;background:#080d16}
+
+
+/* Same bookmark icon as the main movie cards. */
+#film-orbit{display:inline-flex;align-items:center;justify-content:center;gap:8px}#film-orbit .film-watchlist-icon{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round}#film-orbit.is-saved .film-watchlist-icon{fill:currentColor}
 </style>
 <style>
 #gaia-welcome{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at center,#15395f 0%,#040b1beF 62%);display:none;align-items:center;justify-content:center;flex-direction:column;overflow:hidden;text-align:center;padding:25px;cursor:pointer}#gaia-welcome.active{display:flex}#gaia-welcome h2{font:normal clamp(2.6rem,7vw,5rem) Georgia,serif;color:#eaf7ff;text-shadow:0 0 30px #7bc6ff;z-index:2;margin:0 0 16px}#gaia-welcome p{font:clamp(1.1rem,3vw,1.7rem) Georgia,serif;color:#c1e4ff;z-index:2}#gaia-welcome button{z-index:2;background:#16466e;border:1px solid #85c9ff;border-radius:24px;color:white;padding:12px 25px;cursor:pointer} .gaia-spark{position:absolute;left:50%;top:50%;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 12px 3px #8bd5ff;animation:gaia-burst 2.4s ease-out both;transform:rotate(var(--angle)) translateX(0)}@keyframes gaia-burst{0%{opacity:0;transform:rotate(var(--angle)) translateX(0) scale(.3)}12%{opacity:1}65%{opacity:1}100%{opacity:0;transform:rotate(var(--angle)) translateX(var(--distance)) scale(.2)}}@media(prefers-reduced-motion:reduce){.gaia-spark{animation:none;display:none}}
@@ -577,53 +606,38 @@ async function loadFilmCredits(movie){
   console.warn('Film details:',error.message);
  }finally{clearTimeout(timeout);}
 }
+function filmPersonCard(person,role){
+ const b=document.createElement('button');b.type='button';b.className=role==='Director'?'film-director-person':'film-credits-person';
+ if(person.profile_path&&/^\/[a-zA-Z0-9_\/-]+\.(jpg|jpeg|png|webp)$/i.test(person.profile_path)){const img=document.createElement('img');img.src='https://image.tmdb.org/t/p/w185'+person.profile_path;img.alt='Portrait of '+person.name;img.loading='lazy';b.append(img)}
+ const wrap=document.createElement('span');wrap.className='film-person-copy';const name=document.createElement('span');name.className='film-person-name';name.textContent=person.name||'Unknown';const sub=document.createElement('span');sub.className='film-person-role';sub.textContent=role==='Director'?'Director · Explore films':(person.character||'Cast')+' · Explore films';wrap.append(name,sub);b.append(wrap);
+ b.onclick=()=>showFilmPerson(person);return b;
+}
+async function showFilmPerson(person){
+ const panel=document.getElementById('film-people-panel');if(!panel)return;
+ panel.hidden=false;panel.replaceChildren();const heading=document.createElement('h4');heading.textContent=person.name||'Filmography';const status=document.createElement('p');status.textContent='Finding other films…';panel.append(heading,status);panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+ if(!Number.isSafeInteger(Number(person.id))){status.textContent='Filmography unavailable.';return}
+ try{
+  const response=await fetch(TMDB_WORKER+'?person_id='+encodeURIComponent(person.id));if(!response.ok)throw Error('Filmography unavailable');const data=await response.json();
+  if(!panel.isConnected||document.getElementById('film-people-panel')!==panel)return;
+  const films=[...(data.movie_credits?.cast||[]),...(data.movie_credits?.crew||[])].filter(f=>f.id&&f.title).filter(f=>f.release_date||f.poster_path);
+  const unique=[...new Map(films.map(f=>[f.id,f])).values()].sort((a,b)=>(b.popularity||0)-(a.popularity||0)).slice(0,16);
+  status.textContent=unique.length?'Selected films · Choose a title to open its film page':'No filmography available.';
+  const grid=document.createElement('div');grid.className='film-filmography';unique.forEach(f=>{const btn=document.createElement('button');btn.type='button';if(f.poster_path){const img=document.createElement('img');img.src='https://image.tmdb.org/t/p/w185'+f.poster_path;img.alt='';img.loading='lazy';btn.append(img)}const title=document.createElement('span');title.textContent=f.title+(f.release_date?' · '+f.release_date.slice(0,4):'');btn.append(title);btn.onclick=()=>{openFilmPage({tmdbId:f.id,title:f.title,year:(f.release_date||'').slice(0,4),genres:[],rating:f.vote_average||0,img:f.poster_path?'https://image.tmdb.org/t/p/w500'+f.poster_path:'',desc:f.overview||''})};grid.append(btn)});panel.append(grid);
+ }catch(e){status.textContent='Filmography needs the updated Cloudflare Worker. Please publish the companion Worker file.'}
+}
 function renderFilmCredits(data,host){
- const credits=data.credits||data;
- const crew=Array.isArray(credits.crew)?credits.crew:[];
- const cast=Array.isArray(credits.cast)?credits.cast:[];
- const directors=crew.filter(p=>p.job==='Director').map(p=>p.name).filter(Boolean);
- host.replaceChildren();
- const story=document.getElementById('film-story-text');
- if(story&&typeof data.overview==='string'&&data.overview.trim())story.textContent=data.overview;
- const facts=document.getElementById('film-production-content');
- if(facts){facts.classList.add('film-production-list');
-  facts.replaceChildren();
-  const writers=crew.filter(p=>['Writer','Screenplay','Story'].includes(p.job)).map(p=>p.name).filter(Boolean);
-  const entries=[['Original title',data.original_title],['Original language',data.original_language?.toUpperCase()],['Production countries',(data.production_countries||[]).map(c=>c.name).join(', ')],['Production companies',(data.production_companies||[]).map(c=>c.name).join(', ')],['Writers',[...new Set(writers)].join(', ')],['Tagline',data.tagline]];
-  entries.filter(([,v])=>v).forEach(([label,value])=>{const line=document.createElement('p');const strong=document.createElement('strong');strong.textContent=label+': ';line.append(strong,document.createTextNode(value));facts.append(line)});
-  if(!facts.childNodes.length)facts.textContent='Additional production information is not available.';
- }
- const details=document.createElement('p');
- const parts=[];
- if(Number(data.runtime)>0)parts.push(Number(data.runtime)+' min');
- if(data.release_date)parts.push('Released '+data.release_date);
- if(parts.length){details.textContent=parts.join(' · ');details.className='muted';host.append(details);}
- const director=document.createElement('p');director.textContent='Director: '+(directors.join(', ')||'Not available');host.append(director);
- const heading=document.createElement('p');heading.textContent='Cast';heading.style.fontWeight='bold';host.append(heading);
- if(!cast.length){const empty=document.createElement('p');empty.textContent='Cast information not available.';host.append(empty);}
- else{
-  const list=document.createElement('div');list.className='film-credits-cast';
-  cast.slice(0,10).forEach(person=>{
-   const item=document.createElement('div');item.className='film-credits-person';
-   if(typeof person.profile_path==='string'&&/^\/[a-zA-Z0-9_\/-]+\.(?:jpg|jpeg|png|webp)$/i.test(person.profile_path)){
-    const img=document.createElement('img');img.src='https://image.tmdb.org/t/p/w185'+person.profile_path;img.alt='';img.loading='lazy';item.append(img);
-   }
-   const name=document.createElement('span');name.textContent=(person.name||'Unknown')+(person.character?' · '+person.character:'');item.append(name);list.append(item);
-  });
-  host.append(list);
- }
- const videos=Array.isArray(data.videos?.results)?data.videos.results:[];
- const trailer=videos.find(v=>v.site==='YouTube'&&v.type==='Trailer'&&v.official&&/^[a-zA-Z0-9_-]{11}$/.test(v.key))||videos.find(v=>v.site==='YouTube'&&v.type==='Trailer'&&/^[a-zA-Z0-9_-]{11}$/.test(v.key));
- const trailerHost=document.getElementById('film-trailer-content');
- if(trailerHost){
-  trailerHost.replaceChildren();
-  if(trailer){
-   const link=document.createElement('a');link.className='film-trailer-card';link.href='https://www.youtube.com/watch?v='+trailer.key;link.target='_blank';link.rel='noopener noreferrer';link.setAttribute('aria-label','Watch the official trailer on YouTube (opens in a new tab)');
-   const thumb=document.createElement('img');thumb.src='https://img.youtube.com/vi/'+trailer.key+'/hqdefault.jpg';thumb.alt='Trailer preview';thumb.loading='lazy';
-   const play=document.createElement('div');play.className='film-trailer-play';const circle=document.createElement('span');circle.textContent='▶';play.append(circle);link.append(thumb,play);
-   const caption=document.createElement('p');caption.className='film-trailer-caption';caption.textContent='Watch the trailer · Opens on YouTube';trailerHost.append(link,caption);
-  }else{trailerHost.textContent='A trailer is not available for this film yet.';trailerHost.className='muted';}
- }
+ const credits=data.credits||data,crew=Array.isArray(credits.crew)?credits.crew:[],cast=Array.isArray(credits.cast)?credits.cast:[];
+ host.replaceChildren();const story=document.getElementById('film-story-text');if(story&&data.overview?.trim())story.textContent=data.overview;
+ const directors=crew.filter(p=>p.job==='Director');
+ const label=document.createElement('p');label.className='film-person-group-label';label.textContent='Direction';host.append(label);
+ if(directors.length)directors.forEach(p=>host.append(filmPersonCard(p,'Director')));else{const x=document.createElement('p');x.textContent='Director not listed';host.append(x)}
+ const castLabel=document.createElement('p');castLabel.className='film-person-group-label';castLabel.textContent='Featuring';host.append(castLabel);
+ if(cast.length){const grid=document.createElement('div');grid.className='film-credits-cast';cast.slice(0,12).forEach(p=>grid.append(filmPersonCard(p,'Cast')));host.append(grid)}else{const x=document.createElement('p');x.textContent='Cast not available';host.append(x)}
+ const panel=document.createElement('div');panel.id='film-people-panel';panel.className='film-people-panel';panel.hidden=true;host.append(panel);
+ const facts=document.getElementById('film-production-content');if(facts){facts.classList.add('film-production-list');facts.replaceChildren();const writers=crew.filter(p=>['Writer','Screenplay','Story'].includes(p.job)).map(p=>p.name);const entries=[['Runtime',data.runtime?data.runtime+' minutes':''],['Original title',data.original_title],['Original language',data.original_language?.toUpperCase()],['Production countries',(data.production_countries||[]).map(c=>c.name).join(', ')],['Production companies',(data.production_companies||[]).map(c=>c.name).join(', ')],['Written by',[...new Set(writers)].join(', ')],['Tagline',data.tagline]];entries.filter(([,v])=>v).forEach(([k,v])=>{const p=document.createElement('p');const strong=document.createElement('strong');strong.textContent=k;p.append(strong,document.createTextNode(v));facts.append(p)});if(!facts.childNodes.length)facts.textContent='No further production information available.'}
+ const releaseHost=document.getElementById('film-release-content');if(releaseHost){releaseHost.replaceChildren();const dates=(data.release_dates?.results||[]).flatMap(country=>(country.release_dates||[]).filter(r=>r.release_date).slice(0,1).map(r=>({country:country.iso_3166_1,date:r.release_date.slice(0,10)})));dates.sort((a,b)=>a.date.localeCompare(b.date));if(dates.length){const list=document.createElement('div');list.className='film-release-list';dates.forEach(d=>{const p=document.createElement('p');p.textContent=d.country+' · '+d.date;list.append(p)});releaseHost.append(list)}else releaseHost.textContent=data.release_date?'Original release · '+data.release_date:'Country-specific release dates require the updated Worker.'}
+ const videos=Array.isArray(data.videos?.results)?data.videos.results:[];const trailer=videos.find(v=>v.site==='YouTube'&&v.type==='Trailer'&&v.official&&/^[a-zA-Z0-9_-]{11}$/.test(v.key))||videos.find(v=>v.site==='YouTube'&&v.type==='Trailer'&&/^[a-zA-Z0-9_-]{11}$/.test(v.key));
+ const trailerHost=document.getElementById('film-trailer-content');if(trailerHost){trailerHost.replaceChildren();if(trailer){const iframe=document.createElement('iframe');iframe.className='film-trailer-original';iframe.src='https://www.youtube-nocookie.com/embed/'+trailer.key;iframe.title='Official movie trailer';iframe.loading='lazy';iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';iframe.allowFullscreen=true;trailerHost.append(iframe)}else trailerHost.textContent='No official trailer available.'}
 }
 
 /* Film Universe: dedicated in-app film detail view for loaded TMDB movies. */
@@ -632,8 +646,8 @@ function openFilmPage(m){
  filmPageCurrent=m;
  const target=document.getElementById('film-page-content');
  const image=m.img&&m.img.startsWith('https://image.tmdb.org/')?`<img class="film-page-poster" src="${m.img}" alt="${escapeHtml(m.title)} poster">`:'<div class="film-page-poster" style="display:grid;place-items:center;font-size:40px">✦</div>';
- target.innerHTML=`<div class="film-page-layout"><div>${image}</div><div><p class="film-page-eyebrow">✦ A FILMLERRS FILM PORTRAIT</p><h2 class="film-page-title">${escapeHtml(m.title)}</h2><p class="film-page-meta">${m.year||'Year unknown'} · ${m.genres.map(escapeHtml).join(' · ')||'Genre unknown'} · ★ ${Number(m.rating||0).toFixed(1)} TMDB</p><section class="film-extra-section"><h3>Inside the story</h3><p id="film-story-text" class="film-page-desc">${escapeHtml(m.desc||'No synopsis available.')}</p></section><div class="film-page-actions"><button type="button" id="film-love">♡ Appreciate</button><button type="button" id="film-orbit">⌛ My Watchlist</button><button type="button" id="film-dna">✦ Leave an Impression</button></div><section class="film-extra-section"><h3>The people behind the story</h3><div id="film-credits-content" aria-live="polite">Loading film credits…</div></section><section class="film-extra-section"><h3>Beyond the screen</h3><div id="film-production-content" class="muted">Loading production information…</div></section><section class="film-extra-section"><h3>Watch the trailer</h3><div id="film-trailer-content" class="muted">Looking for a trailer…</div></section><section class="film-extra-section"><h3>Recommended by the community</h3><p class="muted">Community recommendations will appear here once Filmlerrs supports public movie recommendations. We won't display made-up members or endorsements.</p></section><p class="muted" style="margin-top:20px;font-size:12px">Your personal ratings and reviews are saved in this browser.</p></div></div>`;
- function update(){const d=dnaData[dnaKey(m)]||{};document.getElementById('film-love').textContent=d.constellation?'♥ Appreciate':'♡ Appreciate';document.getElementById('film-love').style.color=d.constellation?'#ff657d':'';document.getElementById('film-orbit').textContent=d.orbit?'✓ On My Watchlist':'⌛ My Watchlist'}
+ target.innerHTML=`<div class="film-page-layout"><div>${image}</div><div><p class="film-page-eyebrow">✦ A FILMLERRS FILM PORTRAIT</p><h2 class="film-page-title">${escapeHtml(m.title)}</h2><p class="film-page-meta">${m.year||'Year unknown'} · ${m.genres.map(escapeHtml).join(' · ')||'Genre unknown'} · ★ ${Number(m.rating||0).toFixed(1)} TMDB</p><section class="film-extra-section"><h3>Inside the story</h3><p id="film-story-text" class="film-page-desc">${escapeHtml(m.desc||'No synopsis available.')}</p></section><div class="film-page-actions"><button type="button" id="film-love">♡ Appreciate</button><button type="button" id="film-orbit"><svg class="film-watchlist-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h12v16l-6-4-6 4z"/></svg><span>My Watchlist</span></button><button type="button" id="film-dna">✦ Leave an Impression</button></div><section class="film-extra-section"><h3>The people behind the story</h3><div id="film-credits-content" aria-live="polite">Loading film credits…</div></section><section class="film-extra-section"><h3>Release dates by country</h3><div id="film-release-content" class="muted">Loading release dates…</div></section><section class="film-extra-section"><h3>Beyond the screen</h3><div id="film-production-content" class="muted">Loading production information…</div></section><section class="film-extra-section"><h3>Watch the trailer</h3><div id="film-trailer-content" class="muted">Looking for a trailer…</div></section><section class="film-extra-section"><h3>Recommended by the community</h3><p class="muted">Community recommendations will appear here once Filmlerrs supports public movie recommendations. We won't display made-up members or endorsements.</p></section><p class="muted" style="margin-top:20px;font-size:12px">Your personal ratings and reviews are saved in this browser.</p></div></div>`;
+ function update(){const d=dnaData[dnaKey(m)]||{};document.getElementById('film-love').textContent=d.constellation?'♥ Appreciate':'♡ Appreciate';document.getElementById('film-love').style.color=d.constellation?'#ff657d':'';document.getElementById('film-orbit').innerHTML='<svg class="film-watchlist-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h12v16l-6-4-6 4z"/></svg><span>'+(d.orbit?'On My Watchlist':'My Watchlist')+'</span>';document.getElementById('film-orbit').classList.toggle('is-saved',!!d.orbit);document.getElementById('film-orbit').setAttribute('aria-pressed',String(!!d.orbit))}
  document.getElementById('film-love').onclick=()=>{quickDna(m,'constellation');update()};
  document.getElementById('film-orbit').onclick=()=>{quickDna(m,'orbit');update()};
  document.getElementById('film-dna').onclick=()=>openDnaMovie(m);
