@@ -147,6 +147,15 @@
 
 /* Same bookmark icon as the main movie cards. */
 #film-orbit{display:inline-flex;align-items:center;justify-content:center;gap:8px}#film-orbit .film-watchlist-icon{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round}#film-orbit.is-saved .film-watchlist-icon{fill:currentColor}
+
+/* Refined film portrait typography */
+.film-page-desc{font-family:inherit!important;font-size:.91rem!important;line-height:1.75!important;letter-spacing:0!important;max-width:68ch}
+.film-extra-section h3{font-family:inherit!important;font-size:.96rem!important;font-weight:600!important;letter-spacing:.025em!important;text-transform:none!important}
+.film-person-name{font-family:inherit!important;font-size:.87rem!important;font-weight:600!important;letter-spacing:0!important}
+.film-person-role{font-family:inherit!important;font-size:.74rem!important;line-height:1.4!important}
+.film-credits-person,.film-director-person{font-family:inherit!important}
+.film-person-group-label{font-family:inherit!important;font-size:.7rem!important;letter-spacing:.1em!important}
+.film-page-layout .back{font-family:inherit!important;font-size:.84rem!important;letter-spacing:0!important}
 </style>
 <style>
 #gaia-welcome{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at center,#15395f 0%,#040b1beF 62%);display:none;align-items:center;justify-content:center;flex-direction:column;overflow:hidden;text-align:center;padding:25px;cursor:pointer}#gaia-welcome.active{display:flex}#gaia-welcome h2{font:normal clamp(2.6rem,7vw,5rem) Georgia,serif;color:#eaf7ff;text-shadow:0 0 30px #7bc6ff;z-index:2;margin:0 0 16px}#gaia-welcome p{font:clamp(1.1rem,3vw,1.7rem) Georgia,serif;color:#c1e4ff;z-index:2}#gaia-welcome button{z-index:2;background:#16466e;border:1px solid #85c9ff;border-radius:24px;color:white;padding:12px 25px;cursor:pointer} .gaia-spark{position:absolute;left:50%;top:50%;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 12px 3px #8bd5ff;animation:gaia-burst 2.4s ease-out both;transform:rotate(var(--angle)) translateX(0)}@keyframes gaia-burst{0%{opacity:0;transform:rotate(var(--angle)) translateX(0) scale(.3)}12%{opacity:1}65%{opacity:1}100%{opacity:0;transform:rotate(var(--angle)) translateX(var(--distance)) scale(.2)}}@media(prefers-reduced-motion:reduce){.gaia-spark{animation:none;display:none}}
@@ -580,7 +589,7 @@ function openTasteFilm(index){
  openFilmPage(movie);
  const target=document.getElementById('film-page-content');
  const back=document.createElement('button');
- back.type='button';back.className='back';back.textContent='← Back to my Taste Test results';
+ back.type='button';back.className='back';back.textContent='← Return to your discoveries';
  back.onclick=()=>{document.getElementById('film-page-modal').classList.remove('active');document.getElementById('taste-modal').classList.add('active')};
  target.prepend(back);
 }
@@ -590,7 +599,7 @@ async function loadFilmCredits(movie){
  const host=document.getElementById('film-credits-content');
  if(!host)return;
  const id=Number(movie.tmdbId);
- if(!Number.isSafeInteger(id)||id<=0){host.textContent='Credits unavailable for this film because it has no verified TMDB ID.';const facts=document.getElementById('film-production-content');if(facts)facts.textContent='No verified production details available.';return;}
+ if(!Number.isSafeInteger(id)||id<=0){host.textContent='Film credits are unavailable: this recommendation is missing a TMDB movie ID.';const facts=document.getElementById('film-production-content');if(facts)facts.textContent='No verified production details available.';return;}
  if(filmCreditsCache.has(id)){renderFilmCredits(filmCreditsCache.get(id),host);return;}
  const controller=new AbortController();
  const timeout=setTimeout(()=>controller.abort(),9000);
@@ -602,7 +611,7 @@ async function loadFilmCredits(movie){
   filmCreditsCache.set(id,payload);
   if(host.isConnected&&document.getElementById('film-credits-content')===host)renderFilmCredits(payload,host);
  }catch(error){
-  if(host.isConnected&&document.getElementById('film-credits-content')===host){host.textContent=controller.signal.aborted?'Movie details took too long to load. Please try opening this film again.':'Could not load film credits right now.';const facts=document.getElementById('film-production-content');if(facts)facts.textContent='Production details could not be loaded.';}
+  if(host.isConnected&&document.getElementById('film-credits-content')===host){host.textContent=controller.signal.aborted?'Movie details took too long to load. Please try opening this film again.':'Film information could not load. Check the Cloudflare Worker and try again.';const facts=document.getElementById('film-production-content');if(facts)facts.textContent='Production details could not be loaded.';}
   console.warn('Film details:',error.message);
  }finally{clearTimeout(timeout);}
 }
@@ -623,7 +632,7 @@ async function showFilmPerson(person){
   const unique=[...new Map(films.map(f=>[f.id,f])).values()].sort((a,b)=>(b.popularity||0)-(a.popularity||0)).slice(0,16);
   status.textContent=unique.length?'Selected films · Choose a title to open its film page':'No filmography available.';
   const grid=document.createElement('div');grid.className='film-filmography';unique.forEach(f=>{const btn=document.createElement('button');btn.type='button';if(f.poster_path){const img=document.createElement('img');img.src='https://image.tmdb.org/t/p/w185'+f.poster_path;img.alt='';img.loading='lazy';btn.append(img)}const title=document.createElement('span');title.textContent=f.title+(f.release_date?' · '+f.release_date.slice(0,4):'');btn.append(title);btn.onclick=()=>{openFilmPage({tmdbId:f.id,title:f.title,year:(f.release_date||'').slice(0,4),genres:[],rating:f.vote_average||0,img:f.poster_path?'https://image.tmdb.org/t/p/w500'+f.poster_path:'',desc:f.overview||''})};grid.append(btn)});panel.append(grid);
- }catch(e){status.textContent='Filmography needs the updated Cloudflare Worker. Please publish the companion Worker file.'}
+ }catch(e){status.textContent='Filmographies are unavailable until the updated Cloudflare Worker is published.'}
 }
 function renderFilmCredits(data,host){
  const credits=data.credits||data,crew=Array.isArray(credits.crew)?credits.crew:[],cast=Array.isArray(credits.cast)?credits.cast:[];
@@ -636,8 +645,8 @@ function renderFilmCredits(data,host){
  const panel=document.createElement('div');panel.id='film-people-panel';panel.className='film-people-panel';panel.hidden=true;host.append(panel);
  const facts=document.getElementById('film-production-content');if(facts){facts.classList.add('film-production-list');facts.replaceChildren();const writers=crew.filter(p=>['Writer','Screenplay','Story'].includes(p.job)).map(p=>p.name);const entries=[['Runtime',data.runtime?data.runtime+' minutes':''],['Original title',data.original_title],['Original language',data.original_language?.toUpperCase()],['Production countries',(data.production_countries||[]).map(c=>c.name).join(', ')],['Production companies',(data.production_companies||[]).map(c=>c.name).join(', ')],['Written by',[...new Set(writers)].join(', ')],['Tagline',data.tagline]];entries.filter(([,v])=>v).forEach(([k,v])=>{const p=document.createElement('p');const strong=document.createElement('strong');strong.textContent=k;p.append(strong,document.createTextNode(v));facts.append(p)});if(!facts.childNodes.length)facts.textContent='No further production information available.'}
  const releaseHost=document.getElementById('film-release-content');if(releaseHost){releaseHost.replaceChildren();const dates=(data.release_dates?.results||[]).flatMap(country=>(country.release_dates||[]).filter(r=>r.release_date).slice(0,1).map(r=>({country:country.iso_3166_1,date:r.release_date.slice(0,10)})));dates.sort((a,b)=>a.date.localeCompare(b.date));if(dates.length){const list=document.createElement('div');list.className='film-release-list';dates.forEach(d=>{const p=document.createElement('p');p.textContent=d.country+' · '+d.date;list.append(p)});releaseHost.append(list)}else releaseHost.textContent=data.release_date?'Original release · '+data.release_date:'Country-specific release dates require the updated Worker.'}
- const videos=Array.isArray(data.videos?.results)?data.videos.results:[];const trailer=videos.find(v=>v.site==='YouTube'&&v.type==='Trailer'&&v.official&&/^[a-zA-Z0-9_-]{11}$/.test(v.key))||videos.find(v=>v.site==='YouTube'&&v.type==='Trailer'&&/^[a-zA-Z0-9_-]{11}$/.test(v.key));
- const trailerHost=document.getElementById('film-trailer-content');if(trailerHost){trailerHost.replaceChildren();if(trailer){const iframe=document.createElement('iframe');iframe.className='film-trailer-original';iframe.src='https://www.youtube-nocookie.com/embed/'+trailer.key;iframe.title='Official movie trailer';iframe.loading='lazy';iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';iframe.allowFullscreen=true;trailerHost.append(iframe)}else trailerHost.textContent='No official trailer available.'}
+ const videos=Array.isArray(data.videos?.results)?data.videos.results:[];const trailer=videos.find(v=>v.site==='YouTube'&&v.type==='Trailer'&&v.official&&/^[a-zA-Z0-9_-]{11}$/.test(v.key));
+ const trailerHost=document.getElementById('film-trailer-content');if(trailerHost){trailerHost.replaceChildren();if(trailer){const iframe=document.createElement('iframe');iframe.className='film-trailer-original';iframe.src='https://www.youtube-nocookie.com/embed/'+trailer.key;iframe.title=trailer.official?'Official movie trailer':'Movie trailer';iframe.loading='lazy';iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';iframe.allowFullscreen=true;trailerHost.append(iframe)}else trailerHost.textContent='No official trailer is available from the movie database.'}
 }
 
 /* Film Universe: dedicated in-app film detail view for loaded TMDB movies. */
@@ -646,7 +655,7 @@ function openFilmPage(m){
  filmPageCurrent=m;
  const target=document.getElementById('film-page-content');
  const image=m.img&&m.img.startsWith('https://image.tmdb.org/')?`<img class="film-page-poster" src="${m.img}" alt="${escapeHtml(m.title)} poster">`:'<div class="film-page-poster" style="display:grid;place-items:center;font-size:40px">✦</div>';
- target.innerHTML=`<div class="film-page-layout"><div>${image}</div><div><p class="film-page-eyebrow">✦ A FILMLERRS FILM PORTRAIT</p><h2 class="film-page-title">${escapeHtml(m.title)}</h2><p class="film-page-meta">${m.year||'Year unknown'} · ${m.genres.map(escapeHtml).join(' · ')||'Genre unknown'} · ★ ${Number(m.rating||0).toFixed(1)} TMDB</p><section class="film-extra-section"><h3>Inside the story</h3><p id="film-story-text" class="film-page-desc">${escapeHtml(m.desc||'No synopsis available.')}</p></section><div class="film-page-actions"><button type="button" id="film-love">♡ Appreciate</button><button type="button" id="film-orbit"><svg class="film-watchlist-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h12v16l-6-4-6 4z"/></svg><span>My Watchlist</span></button><button type="button" id="film-dna">✦ Leave an Impression</button></div><section class="film-extra-section"><h3>The people behind the story</h3><div id="film-credits-content" aria-live="polite">Loading film credits…</div></section><section class="film-extra-section"><h3>Release dates by country</h3><div id="film-release-content" class="muted">Loading release dates…</div></section><section class="film-extra-section"><h3>Beyond the screen</h3><div id="film-production-content" class="muted">Loading production information…</div></section><section class="film-extra-section"><h3>Watch the trailer</h3><div id="film-trailer-content" class="muted">Looking for a trailer…</div></section><section class="film-extra-section"><h3>Recommended by the community</h3><p class="muted">Community recommendations will appear here once Filmlerrs supports public movie recommendations. We won't display made-up members or endorsements.</p></section><p class="muted" style="margin-top:20px;font-size:12px">Your personal ratings and reviews are saved in this browser.</p></div></div>`;
+ target.innerHTML=`<div class="film-page-layout"><div>${image}</div><div><p class="film-page-eyebrow">✦ A FILMLERRS FILM PORTRAIT</p><h2 class="film-page-title">${escapeHtml(m.title)}</h2><p class="film-page-meta">${m.year||'Year unknown'} · ${m.genres.map(escapeHtml).join(' · ')||'Genre unknown'} · ★ ${Number(m.rating||0).toFixed(1)} TMDB</p><section class="film-extra-section"><h3>Inside the story</h3><p id="film-story-text" class="film-page-desc">${escapeHtml(m.desc||'No synopsis available.')}</p></section><div class="film-page-actions"><button type="button" id="film-love">♡ Appreciate</button><button type="button" id="film-orbit"><svg class="film-watchlist-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h12v16l-6-4-6 4z"/></svg><span>My Watchlist</span></button><button type="button" id="film-dna">✦ Leave an Impression</button></div><section class="film-extra-section"><h3>The people behind the story</h3><div id="film-credits-content" aria-live="polite">Loading film credits…</div></section><section class="film-extra-section"><h3>Release dates by country</h3><div id="film-release-content" class="muted">Loading release dates…</div></section><section class="film-extra-section"><h3>Beyond the screen</h3><div id="film-production-content" class="muted">Loading production information…</div></section><section class="film-extra-section"><h3>Watch the trailer</h3><div id="film-trailer-content" class="muted">Looking for a trailer…</div></section><section class="film-extra-section"><h3>Recommended by the community</h3><p class="muted">Community recommendations will appear here once Filmlerrs supports public movie recommendations. We won't display made-up members or endorsements.</p></section><p class="muted" style="margin-top:20px;font-size:12px">Your impressions are saved in this browser. Sign in is not required, but they will not sync between devices.</p></div></div>`;
  function update(){const d=dnaData[dnaKey(m)]||{};document.getElementById('film-love').textContent=d.constellation?'♥ Appreciate':'♡ Appreciate';document.getElementById('film-love').style.color=d.constellation?'#ff657d':'';document.getElementById('film-orbit').innerHTML='<svg class="film-watchlist-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h12v16l-6-4-6 4z"/></svg><span>'+(d.orbit?'On My Watchlist':'My Watchlist')+'</span>';document.getElementById('film-orbit').classList.toggle('is-saved',!!d.orbit);document.getElementById('film-orbit').setAttribute('aria-pressed',String(!!d.orbit))}
  document.getElementById('film-love').onclick=()=>{quickDna(m,'constellation');update()};
  document.getElementById('film-orbit').onclick=()=>{quickDna(m,'orbit');update()};
@@ -689,9 +698,8 @@ let dnaCurrent=null,dnaDraft=null;
 function dnaKey(m){return m.tmdbId?'tmdb:'+m.tmdbId:'film:'+m.title+'|'+m.year}
 function dnaPersist(){try{localStorage.setItem(DNA_STORAGE,JSON.stringify(dnaData));return true}catch(e){alert('Your browser could not save this memory. Check available storage.');return false}}
 function requireDnaAccount(){
- // Demo-only gate: this is not secure authentication.
- if(!sessionSignedOut && msgUser && currentProfile)return true
- authMode=readProfile()?'login':'signup';renderAuth();openModal('auth-modal');return false;
+ // Guest movie interactions are stored locally in this browser; no account is required.
+ return true;
 }
 function quickDna(m,field){const key=dnaKey(m),entry={...(dnaData[key]||{}),title:m.title,year:m.year,img:m.img||'',genres:m.genres||[]};entry[field]=!entry[field];dnaData[key]=entry;if(!dnaPersist())return;renderMovies();if(document.getElementById('dna-section').style.display!=='none')renderDnaDashboard()}
 function openDnaMovie(m){if(!requireDnaAccount())return;dnaCurrent=m;const entry=dnaData[dnaKey(m)]||{};dnaDraft={orbit:!!entry.orbit,constellation:!!entry.constellation,watched:!!entry.watched,rating:Number(entry.rating)||0,signals:[...(entry.signals||[])],review:entry.review||''};document.getElementById('dna-film-name').textContent=m.title+' ('+(m.year||'—')+')';document.getElementById('dna-review').value=dnaDraft.review;renderDnaEditor();openModal('dna-modal')}
